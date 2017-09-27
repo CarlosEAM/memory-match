@@ -1,6 +1,5 @@
 /*
  * TODO:
- * check if cards match
  * check if game is finished
  * congratulations popup
  * restart button
@@ -19,23 +18,36 @@ let initGame = function() {
   gameSettings.GAME_BOARD = $('.game-board');
   gameSettings.cardsDeck = $('.cards');
   gameSettings.cardsDeckSize = gameSettings.cardsDeck.length;
-  gameSettings.checkCardFlip = false;
+  gameSettings.previousCard = null;
+  gameSettings.cardsFlipped = 0;
+  gameSettings.MAX_CARDS_PAIRS = gameSettings.cardsDeckSize / 2;
+  gameSettings.cardPairsFound = 0;
 
   // shuffle cards
   shuffleCards(gameSettings.cardsDeck);
 
   // set event listener on game board, catch it blubbling and call playerMove();
-  gameSettings.GAME_BOARD.on('click', 'div', playerMove);
+  $('.cards').on('click', playerMove);
 
 };
 
 /**
 * @description Check players progress on card flips
-* @param {$(this)} $(this) - the element caught on.click
+* @param {Object} $(this) - the element caught on.click
 */
 let playerMove = function() {
-  // flip the card
-  flipCard($(this));
+  // only flip cards or check for pairs if there are still available.
+  if (gameSettings.cardPairsFound !== gameSettings.MAX_CARDS_PAIRS) {
+    flipCard($(this));
+    gameSettings.cardsFlipped++;
+    if (gameSettings.cardsFlipped < 2) {
+      gameSettings.previousCard = $(this);
+      $(this).off();
+    } else {
+      checkCardsMatch($(this));
+      gameSettings.cardsFlipped = 0;
+    }
+  }
 
 };
 
@@ -59,6 +71,45 @@ let shuffleCards = function(cards) {
   	cards.splice(shuffle,1);
   }
 };
+
+/**
+* @description Check flipped cards for pairs keeping track of found pairs
+* @param {Object} card - last card flipped
+*/
+let checkCardsMatch = function(card){
+  // to keep previous card value in this context
+  let previousCard = gameSettings.previousCard;
+  if (card.attr('data-card') == previousCard.attr('data-card')){
+    // if pair is found
+    previousCard.off();
+    card.off();
+    // keep track of found pairs
+    gameSettings.cardPairsFound++;
+    setTimeout(function(){
+      previousCard.toggleClass('rubberBand animated');
+      card.toggleClass('rubberBand animated');
+    }, 200, card, previousCard);
+    setTimeout(function(){
+      console.log("you win")
+      previousCard.toggleClass('rubberBand animated');
+      card.toggleClass('rubberBand animated');
+    }, 1000, card, previousCard);
+  } else {
+  	card.off();
+  	setTimeout(function(){
+      previousCard.toggleClass('wobble animated');
+      card.toggleClass('wobble animated');
+    }, 400, card, previousCard);
+    setTimeout(function(){
+  	  flipCard(previousCard);
+  	  flipCard(card);
+  	  previousCard.on('click', playerMove);
+  	  card.on('click', playerMove);
+      previousCard.toggleClass('wobble animated');
+      card.toggleClass('wobble animated');
+  	}, 1000, card, previousCard);
+  }
+}
 
 // prepare game after page load
 $(initGame);
