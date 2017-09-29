@@ -29,7 +29,6 @@ let initGame = function() {
 
   // set event listener on reset buttons
   $('.reset').on('click', resetGame);
-
 };
 
 /**
