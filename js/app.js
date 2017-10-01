@@ -21,7 +21,7 @@ let initGame = function() {
   gameSettings.moves = 0;
 
   // shuffle cards
-  //shuffleCards($('.cards'));
+  shuffleCards($('.cards'));
 
   // set event listeners
   cardsDeck.on('click', playerMove);
@@ -50,11 +50,12 @@ let playerMove = function() {
       gameSettings.cardsFlipped = 0;
     }
   }
-
   // when all pairs found activate popup window
   if (gameSettings.cardPairsFound == gameSettings.MAX_CARDS_PAIRS) {
     theTimer.stop();
     ratePlayer();
+    // prep modal content before displaying
+    setModalContent();
     setTimeout(function(){
       // wait for the last cards to confirm pairing before modal MESSAGE
       $('#myModal').modal();
@@ -128,9 +129,10 @@ let checkCardsMatch = function(card){
 * @description resets the game so player caa start again
 */
 let resetGame = function(){
+  // disable the cards listener until reset is complete
+  $('.cards').off('click', playerMove);
   // flip all cards back.
   setTimeout(function(){
-    $('.flip-card').on('click', playerMove);
     theTimer.stop();
     flipCard($('.flip-card'));
   }, 400);
@@ -143,6 +145,7 @@ let resetGame = function(){
     $('.star-rating').css('opacity', '1');
     theTimer.reset();
     shuffleCards($('.cards'));
+    $('.cards').on('click', playerMove);
   }, 800);
 }
 
@@ -167,11 +170,21 @@ let ratePlayer = function() {
   let moves = gameSettings.moves;
   if (moves == 12) {
     $('.star-rating')[2].style.opacity = 0;
+    $('.star-rating')[5].style.opacity = 0;
   } else if (moves == 16) {
     $('.star-rating')[1].style.opacity = 0;
+    $('.star-rating')[5].style.opacity = 0;
   } else {
     // do nothing
   }
+}
+
+/**
+* @description prep the modal content
+*/
+let setModalContent = function() {
+  $('.modal-info-time').text($('.timer').text());
+  $('.modal-info-moves').text(gameSettings.moves);
 }
 
 // timer object, starts, stops and restarts the timer
