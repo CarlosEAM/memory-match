@@ -1,7 +1,5 @@
 /*
  * TODO:
- * restart button
- * timer
  * star rating
  * moves counter
  */
@@ -64,6 +62,8 @@ let playerMove = function() {
 * @param {Object} card - the div element the user clicked
 */
 let flipCard = function(card) {
+    // start timer on first card flip
+    theTimer.start();
   	card.toggleClass('flip-card');
 };
 
@@ -118,10 +118,14 @@ let checkCardsMatch = function(card){
   }
 }
 
+/**
+* @description resets the game so player cna start again
+*/
 let resetGame = function(){
   // flip all cards back.
   setTimeout(function(){
     $('.flip-card').on('click', playerMove);
+    theTimer.stop();
     flipCard($('.flip-card'));
   }, 400);
   // reset all settings and shuffle cards after they are turned
@@ -129,9 +133,42 @@ let resetGame = function(){
     gameSettings.previousCard = null;
     gameSettings.cardsFlipped = 0;
     gameSettings.cardPairsFound = 0;
+    theTimer.reset();
     shuffleCards($('.cards'));
   }, 800);
 }
+
+// timer object, starts, stops and restarts the timer
+const theTimer = {
+  minutes: 0,
+  seconds: 0,
+  startTimer: true,
+  stopTimer: false,
+  start: function() {
+    if (this.startTimer) {
+      this.startTimer = false;
+      this.timer = setInterval(function() {
+        theTimer.seconds++;
+        theTimer.seconds = (theTimer.seconds == 60)?0:theTimer.seconds;
+        theTimer.minutes = (theTimer.seconds == 0)?theTimer.minutes++:theTimer.minutes;
+        let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
+        let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
+        $('.timer-minutes').text(mins);
+        $('.timer-seconds').text(secs);
+      }, 1000);
+    }
+  },
+  stop: function() {
+    clearInterval(theTimer.timer);
+  },
+  reset: function() {
+    this.seconds = 0;
+    this.minutes = 0;
+    $('.timer-minutes').text("00");
+    $('.timer-seconds').text("00");
+    this.startTimer = true;
+  }
+};
 
 // prepare game after page load
 $(initGame);
