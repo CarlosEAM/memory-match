@@ -1,7 +1,6 @@
 /*
  * TODO:
- * star rating
- * moves counter
+ * Populate the modal window with all the game information
  */
 
 let gameSettings = {};
@@ -18,9 +17,11 @@ let initGame = function() {
   gameSettings.cardsFlipped = 0;
   gameSettings.MAX_CARDS_PAIRS = gameSettings.cardsDeckSize / 2;
   gameSettings.cardPairsFound = 0;
+  // use to rate the player
+  gameSettings.moves = 0;
 
   // shuffle cards
-  shuffleCards($('.cards'));
+  //shuffleCards($('.cards'));
 
   // set event listeners
   cardsDeck.on('click', playerMove);
@@ -42,6 +43,7 @@ let playerMove = function() {
       gameSettings.previousCard = $(this);
       $(this).off();
     } else {
+      gameSettings.moves++;
       checkCardsMatch($(this));
       gameSettings.cardsFlipped = 0;
     }
@@ -49,6 +51,9 @@ let playerMove = function() {
 
   // when all pairs found activate popup window
   if (gameSettings.cardPairsFound == gameSettings.MAX_CARDS_PAIRS) {
+    theTimer.stop();
+    ratePlayer();
+    console.log("moves made: " + gameSettings.moves);
     setTimeout(function(){
       // wait for the last cards to confirm pairing before modal MESSAGE
       $('#myModal').modal();
@@ -119,7 +124,7 @@ let checkCardsMatch = function(card){
 }
 
 /**
-* @description resets the game so player cna start again
+* @description resets the game so player caa start again
 */
 let resetGame = function(){
   // flip all cards back.
@@ -133,9 +138,19 @@ let resetGame = function(){
     gameSettings.previousCard = null;
     gameSettings.cardsFlipped = 0;
     gameSettings.cardPairsFound = 0;
+    gameSettings.moves = 0;
     theTimer.reset();
     shuffleCards($('.cards'));
   }, 800);
+}
+
+/**
+* @description rates the player depending on number of moves
+* @returns {number} players score rating
+*/
+let ratePlayer = function() {
+  let moves = gameSettings.moves;
+  return (moves < 13)?3:(moves > 12 && moves < 16)?2:1;
 }
 
 // timer object, starts, stops and restarts the timer
@@ -143,7 +158,6 @@ const theTimer = {
   minutes: 0,
   seconds: 0,
   startTimer: true,
-  stopTimer: false,
   start: function() {
     if (this.startTimer) {
       this.startTimer = false;
