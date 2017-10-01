@@ -43,23 +43,33 @@
 <!--
 TODO:
   - SITE TITLE
-  - TIMER SPACE
 -->
+  <header>
+    <h1>Card Memory Game</h1>
+  </header>
+  <section class="game-info-wrapper">
 
-  <!-- reset button -->
-  <button type="button" class="btn-reset reset">Reset</button>
+    <!-- moves counter -->
+    <div class="moves-counter-wrapper">
+      <p>Moves: <span class="moves-counter">0</span></p>
+    </div>
 
-  <!-- moves counter -->
-  <div class="moves-counter-wrapper">
-    <p>Moves: <span class="moves-counter">0</span></p>
-  </div>
+    <!-- game timer -->
+    <div class="timer-wrapper">
+      <p class="timer">
+        <span class="timer-minutes">00</span>:<span class="timer-seconds">00</span>
+      </p>
+    </div>
 
-  <!-- game timer -->
-  <div class="timer-wrapper">
-    <p class="timer">
-      <span class="timer-minutes">00</span>:<span class="timer-seconds">00</span>
-    </p>
-  </div>
+    <!-- game star rating -->
+    <div class="star-rating-wrapper">
+      <p><span class="star-rating">*</span> <span class="star-rating">*</span> <span class="star-rating">*</span></p>
+    </div>
+
+    <!-- reset button -->
+    <button type="button" class="btn-reset reset">Reset</button>
+
+  </section>
 
   <section class="game-board">
 

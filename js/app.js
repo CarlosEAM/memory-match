@@ -43,7 +43,9 @@ let playerMove = function() {
       gameSettings.previousCard = $(this);
       $(this).off();
     } else {
+      // update the moves and then check the rating
       updateMovesCounter(true);
+      ratePlayer();
       checkCardsMatch($(this));
       gameSettings.cardsFlipped = 0;
     }
@@ -138,6 +140,7 @@ let resetGame = function(){
     gameSettings.cardsFlipped = 0;
     gameSettings.cardPairsFound = 0;
     updateMovesCounter(false);
+    $('.star-rating').css('opacity', '1');
     theTimer.reset();
     shuffleCards($('.cards'));
   }, 800);
@@ -162,7 +165,13 @@ let updateMovesCounter = function(increase) {
 */
 let ratePlayer = function() {
   let moves = gameSettings.moves;
-  return (moves < 13)?3:(moves > 12 && moves < 16)?2:1;
+  if (moves == 12) {
+    $('.star-rating')[2].style.opacity = 0;
+  } else if (moves == 16) {
+    $('.star-rating')[1].style.opacity = 0;
+  } else {
+    // do nothing
+  }
 }
 
 // timer object, starts, stops and restarts the timer
