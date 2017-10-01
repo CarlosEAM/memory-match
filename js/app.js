@@ -131,19 +131,25 @@ let checkCardsMatch = function(card){
 let resetGame = function(){
   // disable the cards listener until reset is complete
   $('.cards').off('click', playerMove);
+  
   // flip all cards back.
   setTimeout(function(){
     theTimer.stop();
-    flipCard($('.flip-card'));
+    // check if the has been started first to stop timer from starting
+    if ($('.flip-card').length) {
+      flipCard($('.flip-card'));
+    }
+    
   }, 400);
+
   // reset all settings and shuffle cards after they are turned
   setTimeout(function(){
     gameSettings.previousCard = null;
     gameSettings.cardsFlipped = 0;
     gameSettings.cardPairsFound = 0;
+    theTimer.reset();
     updateMovesCounter(false);
     $('.star-rating').css('opacity', '1');
-    theTimer.reset();
     shuffleCards($('.cards'));
     $('.cards').on('click', playerMove);
   }, 800);
