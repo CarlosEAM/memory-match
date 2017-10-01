@@ -43,7 +43,7 @@ let playerMove = function() {
       gameSettings.previousCard = $(this);
       $(this).off();
     } else {
-      gameSettings.moves++;
+      updateMovesCounter(true);
       checkCardsMatch($(this));
       gameSettings.cardsFlipped = 0;
     }
@@ -53,7 +53,6 @@ let playerMove = function() {
   if (gameSettings.cardPairsFound == gameSettings.MAX_CARDS_PAIRS) {
     theTimer.stop();
     ratePlayer();
-    console.log("moves made: " + gameSettings.moves);
     setTimeout(function(){
       // wait for the last cards to confirm pairing before modal MESSAGE
       $('#myModal').modal();
@@ -138,10 +137,23 @@ let resetGame = function(){
     gameSettings.previousCard = null;
     gameSettings.cardsFlipped = 0;
     gameSettings.cardPairsFound = 0;
-    gameSettings.moves = 0;
+    updateMovesCounter(false);
     theTimer.reset();
     shuffleCards($('.cards'));
   }, 800);
+}
+
+/**
+* @description increase of decrease the moves counter
+* @param {boolean} increase - true to increase the counter and false to reset it
+*/
+let updateMovesCounter = function(increase) {
+  if (increase) {
+    gameSettings.moves++;    
+  } else {
+    gameSettings.moves = 0;
+  }
+  $('.moves-counter').text(gameSettings.moves);
 }
 
 /**
