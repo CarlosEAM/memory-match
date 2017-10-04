@@ -14,11 +14,6 @@
 <div class="main-content">
 
   <!-- Bootstrap modal customised for the game -->
-  <!-- TODO:
-    - TIMER SPACE
-    - STARS SPACE
-    - MOVES SPACE
-  -->
   <div class="modal fade" id="myModal">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -39,6 +34,7 @@
             <div>
               <p>Moves: <span class="modal-info-moves"></span></p>
             </div>
+            <table class="leaderboard"></table>
           </section>
           <div class="text-center">
             <button type="button" class="btn btn-primary btn-lg reset" data-dismiss="modal">Play Again?</button>
@@ -151,6 +147,27 @@ TODO:
     </div>
 
   </section>
+
+  <!-- Bootstrap Modal, custom to receive user input -->
+  <div class="modal fade" id="inputModal">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Memory Card Game</h3>
+          <h4>To Enter Leaderboard</h4>
+        </div>
+        <div class="modal-body">
+          <h1 class="text-center">Please enter your name!</h1>
+          <section class="modal-info-wrapper">
+            <input type="text" class="player-name" maxlength="20" name="playerName" autofocus>
+          </section>
+          <div class="text-center">
+            <button type="button" class="btn btn-primary btn-lg continue" data-dismiss="modal">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 </body>

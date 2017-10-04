@@ -1,6 +1,9 @@
 /*
- * TODO:
+ * TODO: FIX TIME FORMATTING
  * Populate the modal window with all the game information
+    * Create leader board with a max of 8 entries to local storage - DONE
+    [ playerName minutes:seconds moves starRating ]
+    * prop player for name to add to their score
  */
 
 let gameSettings = {};
@@ -20,6 +23,17 @@ let initGame = function() {
   // use to rate the player
   gameSettings.moves = 0;
 
+  // check local storage is supported
+  if (typeof(Storage) !== "undefined") {
+    if (sessionStorage.cardGameSet !== "undefined") {
+      // set a dummy leader board
+      let dummyBoard = dummyLeaderboard();
+      setLeaderboard(dummyBoard);
+    }
+  } else {
+    console.log("Unable to create leaderboard. Sorry you don't have local storage support");
+  }
+
   // shuffle cards
   shuffleCards($('.cards'));
 
@@ -28,6 +42,11 @@ let initGame = function() {
 
   // set event listener on reset buttons
   $('.reset').on('click', resetGame);
+
+  // set listener for Leaderboard modal
+  $('.continue').on('click', function() {
+    setModalContent();
+  })
 };
 
 /**
@@ -54,11 +73,10 @@ let playerMove = function() {
   if (gameSettings.cardPairsFound == gameSettings.MAX_CARDS_PAIRS) {
     theTimer.stop();
     ratePlayer();
-    // prep modal content before displaying
-    setModalContent();
+    // wait ms for smooth transition
     setTimeout(function(){
       // wait for the last cards to confirm pairing before modal MESSAGE
-      $('#myModal').modal();
+      $('#inputModal').modal();
     }, 800);
   }
 
@@ -189,8 +207,18 @@ let ratePlayer = function() {
 * @description prep the modal content
 */
 let setModalContent = function() {
+  // update the leaderboard if avaiable
+    if (typeof(Storage) !== "undefined") {
+      updateLeaderboard();
+    }
   $('.modal-info-time').text($('.timer').text());
   $('.modal-info-moves').text(gameSettings.moves);
+  if (typeof(Storage) !== "undefined") {
+    displayLeaderboard();
+  } else {
+    $('.leaderboard').append("<tr><td>Leaderboard unavailable. Your browser does not support Web Storage</td></tr>");
+  }
+  $('#myModal').modal();
 }
 
 // timer object, starts, stops and restarts the timer
@@ -204,7 +232,9 @@ const theTimer = {
       this.timer = setInterval(function() {
         theTimer.seconds++;
         theTimer.seconds = (theTimer.seconds == 60)?0:theTimer.seconds;
-        theTimer.minutes = (theTimer.seconds == 0)?theTimer.minutes++:theTimer.minutes;
+        if (theTimer.seconds == 0) {
+          theTimer.minutes++;
+        }
         let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
         let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
         $('.timer-minutes').text(mins);
@@ -223,6 +253,141 @@ const theTimer = {
     this.startTimer = true;
   }
 };
+
+/**
+* @description create a dummy array of objects to setup the initial leaderboard
+* @returns {array} an array of objects
+*/
+let dummyLeaderboard = function() {
+  let dummyInfo = [{
+    name: "Derelick",
+    time: "0101",
+    moves: 12,
+    stars: 3
+  },{
+    name: "Dave",
+    time: "0116",
+    moves: 17,
+    stars: 2
+  },{
+    name: "Millicent",
+    time: "0140",
+    moves: 22,
+    stars: 1
+  }];
+  sessionStorage.cardGameSet = true;
+  return dummyInfo;
+}
+
+/**
+* @description Updates the localStorage with new leaderboard results
+* @param {array} boardUpdate - takes an array of assorted objects with latest results
+*/
+let setLeaderboard = function(boardUpdate) {
+  let length = boardUpdate.length;
+  sessionStorage.setItem("leaderboardSize", length);
+  for (let i=0; i<length; i++) {
+    sessionStorage.setItem("name" + i, boardUpdate[i].name);
+    sessionStorage.setItem("time" + i, boardUpdate[i].time);
+    sessionStorage.setItem("moves" + i, boardUpdate[i].moves);
+    sessionStorage.setItem("stars" + i, boardUpdate[i].stars);
+  };
+}
+
+/**
+* @description Get the leaderboard from localStorage
+* @return {array} of objects.
+*/
+let getLeaderboard = function() {
+  let leaderboard = [];
+  let length = sessionStorage.getItem("leaderboardSize");
+  for (let i=0; i < length; i++) {
+    leaderboard[i] = {
+      name: sessionStorage.getItem("name"+i),
+      time: sessionStorage.getItem("time"+i),
+      moves: sessionStorage.getItem("moves"+i),
+      stars: sessionStorage.getItem("stars"+i)
+    };
+  };
+  return leaderboard;
+}
+
+/**
+* @description Update leaderboard with current score information
+*/
+let updateLeaderboard = function() {
+  // prep latest score content
+  let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
+  let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
+  let theTime = String(secs + mins);
+  let lastScore = {
+    name: $('.player-name').prop('value'),
+    time: theTime,
+    moves: gameSettings.moves,
+    stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 16)?1:2
+  }
+  let currentBoard = getLeaderboard();
+  let index = 0;
+  let found = false;
+  let count = 0;
+  currentBoard.forEach(function(item) {
+    // statements will check current score against scores in leaderboard
+    if (lastScore.moves !== 0 && item.moves >= lastScore.moves) {
+      if (item.moves == lastScore.moves) {
+        // when both scores have the same number of moves check the time taken to complete
+        if (item.time >= lastScore.time) {
+          if (item.time == lastScore.time) {
+            found = true;
+            index = count;
+          } else {
+            if (!found) {
+              found = true;
+              index = count;
+            }
+          }
+        }
+      } else {
+        if (!found) {
+          found = true;
+          index = count;
+        }
+      }
+    }else{
+      if (!found) {
+        found = true;
+        index = currentBoard.length;
+      }
+    }
+    count++
+  });
+  // clear text from input box
+  $('.player-name').prop('value', "");
+  // add new score to the leaderboard array
+  currentBoard.splice(index, 0, lastScore);
+  setLeaderboard(currentBoard);
+}
+
+/**
+* @description Format leaderboard contents and display
+*/
+let displayLeaderboard = function() {
+  let leaderboard = getLeaderboard();
+  let index = 1;
+  // empty the table prep headers for content
+  $('.leaderboard').html("");
+  $('.leaderboard').append('<caption>LEADERBOARD</caption>');
+  $('.leaderboard').append('<tr><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
+  // get leaderboard format its content and output
+  leaderboard.forEach(function(item) {
+    $('.leaderboard').append('<tr class="board-row"></tr>');
+    $('.board-row:last-child').append($('<td></td>').text(index));
+    $('.board-row:last-child').append($('<td></td>').text(item.name));
+    $('.board-row:last-child').append($('<td></td>').text(item.moves));
+    $('.board-row:last-child').append($('<td></td>').text(item.time));
+    $('.board-row:last-child').append($('<td></td>').text(item.stars));
+    index++;
+  });
+}
 
 // prepare game after page load
 $(initGame);
