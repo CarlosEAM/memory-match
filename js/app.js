@@ -4,6 +4,8 @@
     * Create leader board with a max of 8 entries to local storage - DONE
     [ playerName minutes:seconds moves starRating ]
     * prop player for name to add to their score
+    ISSUE: if the player click on the reset button as soon as the second non matching pair
+    is flipped then those two pairs are flipped again and are left facing forward after reset is done.
  */
 
 let gameSettings = {};
@@ -86,7 +88,7 @@ let playerMove = function() {
 * @description Flip over card to either hide or show it
 * @param {Object} card - the div element the user clicked
 */
-let flipCard = function(card) {console.log("epale");
+let flipCard = function(card) {
     // start timer on first card flip
     theTimer.start();
   	card.toggleClass('flip-card');
@@ -146,28 +148,36 @@ let checkCardsMatch = function(card){
 /**
 * @description resets the game so player caa start again
 */
-let resetGame = function(){
+let resetGame = function(){console.log("multiple clicks")
   // disable the cards listener until reset is complete
   $('.cards').off('click', playerMove);
-  
-  // flip all cards back.
-  theTimer.stop();
-  if ($('.flip-card')) {
-    flipCard($('.flip-card'));
+  // stop player from crashing game with multiple clicks
+  $('.reset').off('click', resetGame);
+  // check the timer needs stopping
+  if (!theTimer.startTimer) {
+    theTimer.stop();
   }
-
-  // reset all settings and shuffle cards after they are turned
-  setTimeout(function(){
-    gameSettings.previousCard = null;
-    gameSettings.cardsFlipped = 0;
-    gameSettings.cardPairsFound = 0;
-    theTimer.reset();
-    updateMovesCounter(false);
-    $('.star-rating').css('opacity', '1');
+  // check a card has been flipped
+  if ($('.flip-card').length > 0) {
+    flipCard($('.flip-card'));
+    // reset all settings and shuffle cards after they are turned
+    setTimeout(function(){console.log("timed out")
+      gameSettings.previousCard = null;
+      gameSettings.cardsFlipped = 0;
+      gameSettings.cardPairsFound = 0;
+      theTimer.reset();
+      updateMovesCounter(false);
+      $('.star-rating').css('opacity', '1');
+      shuffleCards($('.cards'));
+      $('.cards').on('click', playerMove);
+      $('.reset').on('click', resetGame);
+    }, 800);
+  } else {
     shuffleCards($('.cards'));
     $('.cards').on('click', playerMove);
-  }, 800);
-}
+    $('.reset').on('click', resetGame);
+  }
+};
 
 /**
 * @description increase of decrease the moves counter
@@ -193,7 +203,7 @@ let ratePlayer = function() {
     $('.star-rating')[5].style.opacity = 0;
   } else if (moves == 16) {
     $('.star-rating')[1].style.opacity = 0;
-    $('.star-rating')[5].style.opacity = 0;
+    $('.star-rating')[4].style.opacity = 0;
   } else {
     // do nothing
   }
