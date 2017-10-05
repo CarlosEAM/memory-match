@@ -35,7 +35,7 @@ let initGame = function() {
   }
 
   // shuffle cards
-  shuffleCards($('.cards'));
+  //shuffleCards($('.cards'));
 
   // set event listeners
   cardsDeck.on('click', playerMove);
@@ -86,7 +86,7 @@ let playerMove = function() {
 * @description Flip over card to either hide or show it
 * @param {Object} card - the div element the user clicked
 */
-let flipCard = function(card) {
+let flipCard = function(card) {console.log("epale");
     // start timer on first card flip
     theTimer.start();
   	card.toggleClass('flip-card');
@@ -151,14 +151,10 @@ let resetGame = function(){
   $('.cards').off('click', playerMove);
   
   // flip all cards back.
-  setTimeout(function(){
-    theTimer.stop();
-    // check if the has been started first to stop timer from starting
-    if ($('.flip-card').length) {
-      flipCard($('.flip-card'));
-    }
-    
-  }, 400);
+  theTimer.stop();
+  if ($('.flip-card')) {
+    flipCard($('.flip-card'));
+  }
 
   // reset all settings and shuffle cards after they are turned
   setTimeout(function(){
