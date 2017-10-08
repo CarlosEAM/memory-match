@@ -24,6 +24,8 @@ h1 {
 .game-board {
   display: flex;
   flex-wrap: wrap;
+  max-width: 1000px;
+  overflow: hidden;
 }
 
 .game-info-wrapper {
@@ -31,27 +33,29 @@ h1 {
 }
 
 /* playing cards */
-.cards-wrapper {
+.cards {
   margin: 8px 0;
   width: 25%;
 }
 
-.cards {
+.cards-wrapper {
   display: block;
   margin: 0 auto;
   height: 92px;
   perspective: 340px;
+  transition: height 0.32s;
 }
 
-.cards,
-.cards img {
+.cards-wrapper,
+.cards-wrapper img {
   border-radius: 6px;
   width: 68px;
 }
 
-.cards img {
+.cards-wrapper img {
   position: absolute;
-  height: auto;
+  height: 100%;
+  width: auto;
   border: 1px solid #000;
 }
 
@@ -96,6 +100,10 @@ h1 {
 
 .btn-primary {
   border-radius: 50% !important;
+}
+
+.reset {
+  transition: padding 0.2s;
 }
 
 .reset,
@@ -143,6 +151,10 @@ h1 {
   color: #fff;
 }
 
+.table-header th:first-child {
+  padding-left: 4px;
+}
+
 .leaderboard td {
   padding-left: 4px;
 }
@@ -171,4 +183,35 @@ footer {
 footer p {
   color: #d4bb0a;
   text-shadow: 0 2px 2px #000;
+}
+
+/* RESPONSIVE PART */
+
+/* tables */
+@media screen and (min-width: 768px) {
+  .cards-wrapper {
+    height: 110px;
+  }
+}
+
+
+/* Medium screens */
+@media screen and (min-width: 992px) {
+  .reset {
+    padding: 18px 8px;
+  }
+  .moves-counter-wrapper,
+  .timer-wrapper {
+    text-align: left;
+  }
+  .moves-counter-wrapper,
+  .timer-wrapper,
+  .star-rating-wrapper,
+  .reset {
+    margin-top: 32px;
+    font-size: 1.8em;
+  }
+  .cards-wrapper {
+    height: 124px;
+  }
 }
