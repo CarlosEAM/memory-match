@@ -1,10 +1,5 @@
-/*
- * TODO: FIX TIME FORMATTING
- * Populate the modal window with all the game information
-    * Create leader board with a max of 8 entries to local storage - DONE
-    [ playerName minutes:seconds moves starRating ]
-    * prop player for name to add to their score
-    ISSUE: if the player click on the reset button as soon as the second non matching pair
+/* TODO:
+    * ISSUE: if the player click on the reset button as soon as the second non matching pair
     is flipped then those two pairs are flipped again and are left facing forward after reset is done.
  */
 
@@ -27,17 +22,20 @@ let initGame = function() {
 
   // check local storage is supported
   if (typeof(Storage) !== "undefined") {
-    if (sessionStorage.cardGameSet !== "undefined") {
+    if (localStorage.cardGameSet == "undefined") {
       // set a dummy leader board
       let dummyBoard = dummyLeaderboard();
       setLeaderboard(dummyBoard);
+    } else {
+      // load the leaderboard from local storage
+      displayLeaderboard();
     }
   } else {
     console.log("Unable to create leaderboard. Sorry you don't have local storage support");
   }
 
   // shuffle cards
-  //shuffleCards($('.cards'));
+  shuffleCards($('.cards'));
 
   // set event listeners
   cardsDeck.on('click', playerMove);
@@ -148,7 +146,7 @@ let checkCardsMatch = function(card){
 /**
 * @description resets the game so player caa start again
 */
-let resetGame = function(){console.log("multiple clicks")
+let resetGame = function(){
   // disable the cards listener until reset is complete
   $('.cards').off('click', playerMove);
   // stop player from crashing game with multiple clicks
@@ -158,10 +156,10 @@ let resetGame = function(){console.log("multiple clicks")
     theTimer.stop();
   }
   // check a card has been flipped
-  if ($('.flip-card').length > 0) {
+  if ($('.flip-card').length > 0 || gameSettings.moves > 0) {
     flipCard($('.flip-card'));
     // reset all settings and shuffle cards after they are turned
-    setTimeout(function(){console.log("timed out")
+    setTimeout(function(){
       gameSettings.previousCard = null;
       gameSettings.cardsFlipped = 0;
       gameSettings.cardPairsFound = 0;
@@ -267,21 +265,21 @@ const theTimer = {
 let dummyLeaderboard = function() {
   let dummyInfo = [{
     name: "Derelick",
-    time: "0101",
+    time: "01:01",
     moves: 12,
     stars: 3
   },{
     name: "Dave",
-    time: "0116",
+    time: "01:16",
     moves: 17,
     stars: 2
   },{
     name: "Millicent",
-    time: "0140",
+    time: "01:40",
     moves: 22,
     stars: 1
   }];
-  sessionStorage.cardGameSet = true;
+  localStorage.cardGameSet = true;
   return dummyInfo;
 }
 
@@ -291,12 +289,12 @@ let dummyLeaderboard = function() {
 */
 let setLeaderboard = function(boardUpdate) {
   let length = boardUpdate.length;
-  sessionStorage.setItem("leaderboardSize", length);
+  localStorage.setItem("leaderboardSize", length);
   for (let i=0; i<length; i++) {
-    sessionStorage.setItem("name" + i, boardUpdate[i].name);
-    sessionStorage.setItem("time" + i, boardUpdate[i].time);
-    sessionStorage.setItem("moves" + i, boardUpdate[i].moves);
-    sessionStorage.setItem("stars" + i, boardUpdate[i].stars);
+    localStorage.setItem("name" + i, boardUpdate[i].name);
+    localStorage.setItem("time" + i, boardUpdate[i].time);
+    localStorage.setItem("moves" + i, boardUpdate[i].moves);
+    localStorage.setItem("stars" + i, boardUpdate[i].stars);
   };
 }
 
@@ -306,13 +304,13 @@ let setLeaderboard = function(boardUpdate) {
 */
 let getLeaderboard = function() {
   let leaderboard = [];
-  let length = sessionStorage.getItem("leaderboardSize");
+  let length = localStorage.getItem("leaderboardSize");
   for (let i=0; i < length; i++) {
     leaderboard[i] = {
-      name: sessionStorage.getItem("name"+i),
-      time: sessionStorage.getItem("time"+i),
-      moves: sessionStorage.getItem("moves"+i),
-      stars: sessionStorage.getItem("stars"+i)
+      name: localStorage.getItem("name"+i),
+      time: localStorage.getItem("time"+i),
+      moves: localStorage.getItem("moves"+i),
+      stars: localStorage.getItem("stars"+i)
     };
   };
   return leaderboard;
@@ -325,19 +323,19 @@ let updateLeaderboard = function() {
   // prep latest score content
   let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
   let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
-  let theTime = String(secs + mins);
+  let theTime = String(mins + ":" + secs);
   let lastScore = {
     name: $('.player-name').prop('value'),
     time: theTime,
     moves: gameSettings.moves,
-    stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 16)?1:2
+    stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 18)?1:2
   }
   let currentBoard = getLeaderboard();
   let index = 0;
   let found = false;
   let count = 0;
-  currentBoard.forEach(function(item) {
-    // statements will check current score against scores in leaderboard
+  currentBoard.forEach(function(item, indice) {
+    // check current score against scores in leaderboard
     if (lastScore.moves !== 0 && item.moves >= lastScore.moves) {
       if (item.moves == lastScore.moves) {
         // when both scores have the same number of moves check the time taken to complete
@@ -358,11 +356,6 @@ let updateLeaderboard = function() {
           index = count;
         }
       }
-    }else{
-      if (!found) {
-        found = true;
-        index = currentBoard.length;
-      }
     }
     count++
   });
@@ -370,6 +363,10 @@ let updateLeaderboard = function() {
   $('.player-name').prop('value', "");
   // add new score to the leaderboard array
   currentBoard.splice(index, 0, lastScore);
+  // make sure leaderboard has no more than 5 entries
+  if (currentBoard.length > 5) {
+    currentBoard.splice(5, 1);
+  };
   setLeaderboard(currentBoard);
 }
 
@@ -382,7 +379,7 @@ let displayLeaderboard = function() {
   // empty the table prep headers for content
   $('.leaderboard').html("");
   $('.leaderboard').append('<caption>LEADERBOARD</caption>');
-  $('.leaderboard').append('<tr><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
+  $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
   // get leaderboard format its content and output
   leaderboard.forEach(function(item) {
     $('.leaderboard').append('<tr class="board-row"></tr>');
