@@ -201,10 +201,6 @@ footer p {
     padding: 18px 8px;
   }
   .moves-counter-wrapper,
-  .timer-wrapper {
-    text-align: left;
-  }
-  .moves-counter-wrapper,
   .timer-wrapper,
   .star-rating-wrapper,
   .reset {
