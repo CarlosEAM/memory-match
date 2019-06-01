@@ -1,6 +1,8 @@
 /* TODO:
-    * ISSUE: if the player click on the reset button as soon as the second non matching pair
-    is flipped then those two pairs are flipped again and are left facing forward after reset is done.
+    1. scoreboard does not check the score properly so players not is the right order.
+    2. Give players some options:
+      2.1 select another set of memory pictures.
+      2.2 change game theme.
  */
 
 let gameSettings = {};
@@ -62,6 +64,12 @@ let playerMove = function() {
       gameSettings.previousCard = $(this);
       $(this).off();
     } else {
+      // diactivate reset button until animation is done
+      $('.reset').off('click', resetGame);
+      // reactivate reset after 1 second, which should be enough time for animation to complete
+      setTimeout(()=>{
+        $('.reset').on('click', resetGame);
+      }, 1000);
       // update the moves and then check the rating
       updateMovesCounter(true);
       ratePlayer();
