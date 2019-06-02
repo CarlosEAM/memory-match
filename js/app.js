@@ -3,14 +3,17 @@
     2. Give players some options:
       2.1 select another set of memory pictures.
       2.2 change game theme.
+    3. Aria update
  */
 
 let gameSettings = {};
+let gameLeaderboard;
 
 /**
 * @description initialise the game
 */
 let initGame = function() {
+  console.log(gameLeaderboard)
   // init settings
   let cardsDeck = $('.cards');
   gameSettings.cardsToReset = $('.cards');
@@ -22,18 +25,13 @@ let initGame = function() {
   // use to rate the player
   gameSettings.moves = 0;
 
-  // check local storage is supported
+  // create leaderboard if local storage support
   if (typeof(Storage) !== "undefined") {
-    if (localStorage.cardGameSet == "undefined") {
-      // set a dummy leader board
-      let dummyBoard = dummyLeaderboard();
-      setLeaderboard(dummyBoard);
-    } else {
-      // load the leaderboard from local storage
-      displayLeaderboard();
-    }
+    // leaderboard instance
+    gameLeaderboard = new Leaderboard();
   } else {
-    console.log("Unable to create leaderboard. Sorry you don't have local storage support");
+    gameLeaderboard = "Unable to create leaderboard. Sorry you don't have local storage support";
+    console.log(gameLeaderboard);
   }
 
   // shuffle cards
@@ -97,7 +95,7 @@ let playerMove = function() {
 let flipCard = function(card) {
     // start timer on first card flip
     theTimer.start();
-  	card.toggleClass('flip-card');
+    card.toggleClass('flip-card');
 };
 
 /**
@@ -107,9 +105,9 @@ let flipCard = function(card) {
 let shuffleCards = function(cards) {
   let shuffle = 0;
   for (let deckSize=cards.length; deckSize > 0; deckSize--) {
-  	shuffle = Math.round(Math.random() * (deckSize - 1));
-  	$(cards[shuffle]).css('order',deckSize);
-  	cards.splice(shuffle,1);
+    shuffle = Math.round(Math.random() * (deckSize - 1));
+    $(cards[shuffle]).css('order',deckSize);
+    cards.splice(shuffle,1);
   }
 };
 
@@ -135,19 +133,19 @@ let checkCardsMatch = function(card){
       card.toggleClass('rubberBand animated');
     }, 1000, card, previousCard);
   } else {
-  	card.off();
-  	setTimeout(function(){
+    card.off();
+    setTimeout(function(){
       previousCard.toggleClass('wobble animated');
       card.toggleClass('wobble animated');
     }, 400, card, previousCard);
     setTimeout(function(){
-  	  flipCard(previousCard);
-  	  flipCard(card);
-  	  previousCard.on('click', playerMove);
-  	  card.on('click', playerMove);
+      flipCard(previousCard);
+      flipCard(card);
+      previousCard.on('click', playerMove);
+      card.on('click', playerMove);
       previousCard.toggleClass('wobble animated');
       card.toggleClass('wobble animated');
-  	}, 1000, card, previousCard);
+    }, 1000, card, previousCard);
   }
 }
 
@@ -265,6 +263,77 @@ const theTimer = {
     this.startTimer = true;
   }
 };
+
+
+
+// TODO: LEADERBOARD BUG BEING FIX
+/**
+The leaderboard is not ranking the players scores properly.
+ISSUES:
+  - Players with low scores are being placed ontop of players with higher scores.
+  - The modal box diplaying the scores is messing with the page layout pushing elements out of wack.
+  - Combine the leaderboard functions and build an interface
+*/
+
+class Leaderboard {
+  constructor() {
+    /* something here *
+    if (typeof(Storage) !== "undefined") {
+      if (localStorage.cardGameSet == "undefined") {
+        // set a dummy leader board
+        let dummyBoard = dummyLeaderboard();
+        setLeaderboard(dummyBoard);
+      } else {
+        // load the leaderboard from local storage
+        displayLeaderboard();
+      }
+    } else {
+      console.log("Unable to create leaderboard. Sorry you don't have local storage support");
+    }
+    */
+    $('.leaderboard').html("");
+    $('.leaderboard').append('<caption>LEADERBOARD</caption>');
+    $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
+  }
+  get scores() {
+    let scores = [];
+    let length = localStorage.getItem("leaderboardSize");
+    for (let i=0; i < length; i++) {
+      scores[i] = {
+        name: localStorage.getItem("name"+i),
+        time: localStorage.getItem("time"+i),
+        moves: localStorage.getItem("moves"+i),
+        stars: localStorage.getItem("stars"+i)
+      };
+    };
+    return scores;
+  }
+  displayScores() {
+    $('#myModal').modal();
+/*
+    let leaderboard = getLeaderboard();
+    let index = 1;
+    // empty the table prep headers for content
+    $('.leaderboard').html("");
+    $('.leaderboard').append('<caption>LEADERBOARD</caption>');
+    $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
+    // get leaderboard format its content and output
+    leaderboard.forEach(function(item) {
+      $('.leaderboard').append('<tr class="board-row"></tr>');
+      $('.board-row:last-child').append($('<td></td>').text(index));
+      $('.board-row:last-child').append($('<td></td>').text(item.name));
+      $('.board-row:last-child').append($('<td></td>').text(item.moves));
+      $('.board-row:last-child').append($('<td></td>').text(item.time));
+      $('.board-row:last-child').append($('<td></td>').text(item.stars));
+      index++;
+    });
+*/
+    }
+}
+
+
+
+
 
 /**
 * @description create a dummy array of objects to setup the initial leaderboard
