@@ -22,10 +22,6 @@ Just open the page in any web browers to begin.
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## Issues
-
-  - Clicking on the reset button within a few milliseconds after flipping a second card which doesn't match creates an error in the resetGame process which messes with the timer and those cards don't flip back.
-
 ## License
 
 The contents of this repository are covered under [**GNU GPLv3**](LICENSE).
