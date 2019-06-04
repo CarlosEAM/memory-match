@@ -271,18 +271,20 @@ const theTimer = {
   }
 };
 
-
-/**
-ISSUES: TODO: LEADERBOARD BUG BEING FIX
-  - The modal box diplaying the scores is messing with the page layout pushing elements out of wack.
-*/
-
 class Leaderboard {
+  /**
+  * @description Represents the game leaderboard
+  * @construtor
+  */
   constructor() {
     $('.leaderboard').html("");
     $('.leaderboard').append('<caption>LEADERBOARD</caption>');
     $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
   }
+  /**
+  * @description getter to retrieve scoreboard from localStorage
+  * @returns {array of objects} scores
+  */
   get retrieveScores() {
     let scores = [];
     let length = localStorage.getItem("leaderboardSize");
@@ -296,6 +298,12 @@ class Leaderboard {
     };
     return scores;
   }
+  /**
+  * @description Takes the values and compares them according to moves and time into new array, update.
+  * @param {array of object} latest - Scores from the game just played
+  * @param {array of objects} localScores - Scores from previous games saved in localStorage
+  * @returns {array of objects} update
+  */
   compareScores(latest, localScores) {
     let localSize = parseInt(localStorage.getItem("leaderboardSize"));
     let latestPush = true; // to stop interation if pushed to update array
@@ -334,6 +342,9 @@ class Leaderboard {
     });
     return update;
   }
+  /**
+  * @description gathers the last games score results and leaderboard stored in localStorage updating the modal and localstorage
+  */
   prepareScores() {
     let update;
     // gather the latest score results
@@ -354,6 +365,10 @@ class Leaderboard {
     this.updateModal(update);
     this.updateLocalStorage(update);
   }
+  /**
+  * @description Updates the modal window using HTML tags adding the new scoreboard information
+  * @param {array of objects} update - Updated scoreboard
+  */
   updateModal(update) {
     // set latest score information at top of modal
     $('.modal-info-time').text(theTimer.retrieveTime());
@@ -368,6 +383,10 @@ class Leaderboard {
       $('.board-row:last-child').append($('<td></td>').text(item.stars));
     });
   }
+  /**
+  * @description Updates the localStorage with the latest scoreboard
+  * @param {array of objects} update - Updated scoreboard
+  */
   updateLocalStorage(update) {
     localStorage.setItem("leaderboardSize", update.length);
     update.forEach( (item, i) => {
@@ -377,6 +396,9 @@ class Leaderboard {
       localStorage.setItem("stars" + i, item.stars);
     })
   }
+  /**
+  * @description Brings the modal window to the front displaying the leaderboard and last game scores
+  */
   displayScores() {
     this.prepareScores();
     $('#myModal').modal();
