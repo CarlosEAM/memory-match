@@ -1,9 +1,7 @@
 /* TODO:
-    1. scoreboard does not check the score properly so players not is the right order.
     2. Give players some options:
       2.1 select another set of memory pictures.
       2.2 change game theme.
-    3. Aria update
  */
 
 let gameSettings = {};
@@ -367,9 +365,6 @@ class Leaderboard {
     }else{
       update = latest;
     }
-    console.log("latest: " + latest);
-    console.log("local: " + localScores);
-    console.log("update: " + update);
     this.updateModal(update);
     this.updateLocalStorage(update);
   }
@@ -411,145 +406,6 @@ class Leaderboard {
     this.prepareScores();
     $('#myModal').modal();
   }
-}
-
-
-function testData() {
-  // latest results
-  theTimer.minutes = 1;
-  theTimer.seconds = 10;
-  gameSettings.moves = "5";
-  $('.player-name').prop('value', "Sakura");
-  // local scores
-  localStorage.setItem("leaderboardSize", 5);
-  localStorage.setItem("name0", "Amy");
-  localStorage.setItem("time0", "01:20");
-  localStorage.setItem("moves0", 11);
-  localStorage.setItem("stars0", 3);
-  localStorage.setItem("name1", "Tsunade");
-  localStorage.setItem("time1", "01:55");
-  localStorage.setItem("moves1", 12);
-  localStorage.setItem("stars1", 3);
-  localStorage.setItem("name2", "llorona");
-  localStorage.setItem("time2", "02:20");
-  localStorage.setItem("moves2", 15);
-  localStorage.setItem("stars2", 2);
-  localStorage.setItem("name3", "Tiffany");
-  localStorage.setItem("time3", "02:21");
-  localStorage.setItem("moves3", 16);
-  localStorage.setItem("stars3", 2);
-  localStorage.setItem("name4", "Antonio");
-  localStorage.setItem("time4", "02:50");
-  localStorage.setItem("moves4", 22);
-  localStorage.setItem("stars4", 1);
-}
-
-
-/**
-* @description Updates the localStorage with new leaderboard results
-* @param {array} boardUpdate - takes an array of assorted objects with latest results
-*/
-let setLeaderboard = function(boardUpdate) {
-  let length = boardUpdate.length;
-  localStorage.setItem("leaderboardSize", length);
-  for (let i=0; i<length; i++) {
-    localStorage.setItem("name" + i, boardUpdate[i].name);
-    localStorage.setItem("time" + i, boardUpdate[i].time);
-    localStorage.setItem("moves" + i, boardUpdate[i].moves);
-    localStorage.setItem("stars" + i, boardUpdate[i].stars);
-  };
-}
-
-/**
-* @description Get the leaderboard from localStorage
-* @return {array} of objects.
-*/
-let getLeaderboard = function() {
-  let leaderboard = [];
-  let length = localStorage.getItem("leaderboardSize");
-  for (let i=0; i < length; i++) {
-    leaderboard[i] = {
-      name: localStorage.getItem("name"+i),
-      time: localStorage.getItem("time"+i),
-      moves: localStorage.getItem("moves"+i),
-      stars: localStorage.getItem("stars"+i)
-    };
-  };
-  return leaderboard;
-}
-
-/**
-* @description Update leaderboard with current score information
-*/
-let updateLeaderboard = function() {
-  // prep latest score content
-  let theTime = theTimer.retrieveTime();
-  let lastScore = {
-    name: $('.player-name').prop('value'),
-    time: theTime,
-    moves: gameSettings.moves,
-    stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 18)?1:2
-  }
-  let currentBoard = getLeaderboard();
-  let index = 0;
-  let found = false;
-  let count = 0;
-  currentBoard.forEach(function(item, indice) {
-    // check current score against scores in leaderboard
-    if (lastScore.moves !== 0 && item.moves >= lastScore.moves) {
-      if (item.moves == lastScore.moves) {
-        // when both scores have the same number of moves check the time taken to complete
-        if (item.time >= lastScore.time) {
-          if (item.time == lastScore.time) {
-            found = true;
-            index = count;
-          } else {
-            if (!found) {
-              found = true;
-              index = count;
-            }
-          }
-        }
-      } else {
-        if (!found) {
-          found = true;
-          index = count;
-        }
-      }
-    }
-    count++
-  });
-  // clear text from input box
-  $('.player-name').prop('value', "");
-  // add new score to the leaderboard array
-  currentBoard.splice(index, 0, lastScore);
-  // make sure leaderboard has no more than 5 entries
-  if (currentBoard.length > 5) {
-    currentBoard.splice(5, 1);
-  };
-  setLeaderboard(currentBoard);
-}
-
-/**
-* @description Format leaderboard contents and display
-*/
-let displayLeaderboard = function() {
-  let leaderboard = getLeaderboard();
-  let index = 1;
-  // empty the table prep headers for content
-  $('.leaderboard').html("");
-  $('.leaderboard').append('<caption>LEADERBOARD</caption>');
-  $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
-  // get leaderboard format its content and output
-  leaderboard.forEach(function(item) {
-    $('.leaderboard').append('<tr class="board-row"></tr>');
-    $('.board-row:last-child').append($('<td></td>').text(index));
-    $('.board-row:last-child').append($('<td></td>').text(item.name));
-    $('.board-row:last-child').append($('<td></td>').text(item.moves));
-    $('.board-row:last-child').append($('<td></td>').text(item.time));
-    $('.board-row:last-child').append($('<td></td>').text(item.stars));
-    index++;
-  });
 }
 
 // prepare game after page load
