@@ -45,7 +45,8 @@ let initGame = function() {
 
   // set listener for Leaderboard modal
   $('.continue').on('click', function() {
-    setModalContent();
+    // setModalContent();
+    gameLeaderboard.displayScores();
   })
 };
 
@@ -150,7 +151,7 @@ let checkCardsMatch = function(card){
 }
 
 /**
-* @description resets the game so player caa start again
+* @description resets the game so player can start again
 */
 let resetGame = function(){
   // disable the cards listener until reset is complete
@@ -213,7 +214,7 @@ let ratePlayer = function() {
   }
 }
 
-/**
+/** TODO: YOU MAY DELETE THIS IN TIME!
 * @description prep the modal content
 */
 let setModalContent = function() {
@@ -288,14 +289,18 @@ class Leaderboard {
   get retrieveScores() {
     let scores = [];
     let length = localStorage.getItem("leaderboardSize");
-    for (let i=0; i < length; i++) {
-      scores[i] = {
-        name: localStorage.getItem("name"+i),
-        time: localStorage.getItem("time"+i),
-        moves: localStorage.getItem("moves"+i),
-        stars: localStorage.getItem("stars"+i)
+    if (length > 0) {
+      for (let i=0; i < length; i++) {
+        scores[i] = {
+          name: localStorage.getItem("name"+i),
+          time: localStorage.getItem("time"+i),
+          moves: localStorage.getItem("moves"+i),
+          stars: localStorage.getItem("stars"+i)
+        };
       };
-    };
+    }else{
+      scores = false;
+    }
     return scores;
   }
   /**
@@ -362,6 +367,9 @@ class Leaderboard {
     }else{
       update = latest;
     }
+    console.log("latest: " + latest);
+    console.log("local: " + localScores);
+    console.log("update: " + update);
     this.updateModal(update);
     this.updateLocalStorage(update);
   }
