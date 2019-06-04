@@ -261,6 +261,12 @@ const theTimer = {
     $('.timer-minutes').text("00");
     $('.timer-seconds').text("00");
     this.startTimer = true;
+  },
+  retrieveTime: function() {
+    let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
+    let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
+    let theTime = String(mins + ":" + secs);
+    return theTime;
   }
 };
 
@@ -270,32 +276,17 @@ const theTimer = {
 /**
 The leaderboard is not ranking the players scores properly.
 ISSUES:
-  - Players with low scores are being placed ontop of players with higher scores.
   - The modal box diplaying the scores is messing with the page layout pushing elements out of wack.
   - Combine the leaderboard functions and build an interface
 */
 
 class Leaderboard {
   constructor() {
-    /* something here *
-    if (typeof(Storage) !== "undefined") {
-      if (localStorage.cardGameSet == "undefined") {
-        // set a dummy leader board
-        let dummyBoard = dummyLeaderboard();
-        setLeaderboard(dummyBoard);
-      } else {
-        // load the leaderboard from local storage
-        displayLeaderboard();
-      }
-    } else {
-      console.log("Unable to create leaderboard. Sorry you don't have local storage support");
-    }
-    */
     $('.leaderboard').html("");
     $('.leaderboard').append('<caption>LEADERBOARD</caption>');
     $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
   }
-  get scores() {
+  get retrieveScores() {
     let scores = [];
     let length = localStorage.getItem("leaderboardSize");
     for (let i=0; i < length; i++) {
@@ -308,57 +299,93 @@ class Leaderboard {
     };
     return scores;
   }
+  compareScores(latest, localScores) {
+    let localSize = parseInt(localStorage.getItem("leaderboardSize"));
+    let latestPush = true; // to stop interation if pushed to update array
+    let update = []
+    // take the latest and local scores and compare them
+    localScores.forEach( (local, index) => {
+      if (latestPush) {
+        if (latest[0].moves < local.moves) {
+          update.push(latest[0]);
+          latestPush = false;
+        }else if (latest[0].moves > local.moves) {
+          update.push(local);
+        }else if (latest[0].moves == local.moves) {
+          if (latest[0].time <= local.time) {
+            update.push(latest[0]);
+            latestPush = false;
+          }else{
+            update.push(local);
+          }
+        }
+      }else{
+        update.push(local);
+      }
+      if ( (index + 1) == localSize && 5 > localSize) {
+        if (latestPush) {
+          update.push(latest[0]);
+        }else{
+          update.push(local);
+        }
+      } 
+    });
+    return update;
+  }
+  prepareScores() {
+    // gather the latest score results
+    let latest = [{
+      name: $('.player-name').prop('value'),
+      time: theTimer.retrieveTime(),
+      moves: gameSettings.moves,
+      stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 18)?1:2
+    }];
+    // gather local scores, if any
+    let localScores = this.retrieveScores;
+    // make sure localstorage data exists before comparing
+    if (localScores) {
+      return this.compareScores(latest, localScores);
+    }else{
+      return latest;
+    }
+  }
+  
   displayScores() {
     $('#myModal').modal();
-/*
-    let leaderboard = getLeaderboard();
-    let index = 1;
-    // empty the table prep headers for content
-    $('.leaderboard').html("");
-    $('.leaderboard').append('<caption>LEADERBOARD</caption>');
-    $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
-    // get leaderboard format its content and output
-    leaderboard.forEach(function(item) {
-      $('.leaderboard').append('<tr class="board-row"></tr>');
-      $('.board-row:last-child').append($('<td></td>').text(index));
-      $('.board-row:last-child').append($('<td></td>').text(item.name));
-      $('.board-row:last-child').append($('<td></td>').text(item.moves));
-      $('.board-row:last-child').append($('<td></td>').text(item.time));
-      $('.board-row:last-child').append($('<td></td>').text(item.stars));
-      index++;
-    });
-*/
-    }
+  }
 }
 
 
-
-
-
-/**
-* @description create a dummy array of objects to setup the initial leaderboard
-* @returns {array} an array of objects
-*/
-let dummyLeaderboard = function() {
-  let dummyInfo = [{
-    name: "Derelick",
-    time: "01:01",
-    moves: 12,
-    stars: 3
-  },{
-    name: "Dave",
-    time: "01:16",
-    moves: 17,
-    stars: 2
-  },{
-    name: "Millicent",
-    time: "01:40",
-    moves: 22,
-    stars: 1
-  }];
-  localStorage.cardGameSet = true;
-  return dummyInfo;
+function testData() {
+  // latest results
+  theTimer.minutes = 1;
+  theTimer.seconds = 20;
+  gameSettings.moves = "10";
+  $('.player-name').prop('value', "Sakura");
+  // local scores
+  localStorage.setItem("leaderboardSize", 5);
+  localStorage.setItem("name0", "Amy");
+  localStorage.setItem("time0", "01:20");
+  localStorage.setItem("moves0", 10);
+  localStorage.setItem("stars0", 3);
+  localStorage.setItem("name1", "Tsunade");
+  localStorage.setItem("time1", "01:55");
+  localStorage.setItem("moves1", 12);
+  localStorage.setItem("stars1", 3);
+  localStorage.setItem("name2", "llorona");
+  localStorage.setItem("time2", "02:20");
+  localStorage.setItem("moves2", 15);
+  localStorage.setItem("stars2", 2);
+  localStorage.setItem("name3", "Tiffany");
+  localStorage.setItem("time3", "02:21");
+  localStorage.setItem("moves3", 16);
+  localStorage.setItem("stars3", 2);
+  localStorage.setItem("name4", "Antonio");
+  localStorage.setItem("time4", "02:50");
+  localStorage.setItem("moves4", 22);
+  localStorage.setItem("stars4", 1);
 }
+
 
 /**
 * @description Updates the localStorage with new leaderboard results
@@ -398,9 +425,7 @@ let getLeaderboard = function() {
 */
 let updateLeaderboard = function() {
   // prep latest score content
-  let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
-  let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
-  let theTime = String(mins + ":" + secs);
+  let theTime = theTimer.retrieveTime();
   let lastScore = {
     name: $('.player-name').prop('value'),
     time: theTime,
