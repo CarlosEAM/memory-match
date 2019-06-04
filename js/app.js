@@ -1,9 +1,7 @@
 /* TODO:
-    1. scoreboard does not check the score properly so players not is the right order.
     2. Give players some options:
       2.1 select another set of memory pictures.
       2.2 change game theme.
-    3. Aria update
  */
 
 let gameSettings = {};
@@ -45,7 +43,8 @@ let initGame = function() {
 
   // set listener for Leaderboard modal
   $('.continue').on('click', function() {
-    setModalContent();
+    // setModalContent();
+    gameLeaderboard.displayScores();
   })
 };
 
@@ -150,7 +149,7 @@ let checkCardsMatch = function(card){
 }
 
 /**
-* @description resets the game so player caa start again
+* @description resets the game so player can start again
 */
 let resetGame = function(){
   // disable the cards listener until reset is complete
@@ -213,7 +212,7 @@ let ratePlayer = function() {
   }
 }
 
-/**
+/** TODO: YOU MAY DELETE THIS IN TIME!
 * @description prep the modal content
 */
 let setModalContent = function() {
@@ -221,6 +220,7 @@ let setModalContent = function() {
     if (typeof(Storage) !== "undefined") {
       updateLeaderboard();
     }
+  // sets latest score on top of leaderboard
   $('.modal-info-time').text($('.timer').text());
   $('.modal-info-moves').text(gameSettings.moves);
   if (typeof(Storage) !== "undefined") {
@@ -261,212 +261,151 @@ const theTimer = {
     $('.timer-minutes').text("00");
     $('.timer-seconds').text("00");
     this.startTimer = true;
+  },
+  retrieveTime: function() {
+    let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
+    let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
+    let theTime = String(mins + ":" + secs);
+    return theTime;
   }
 };
 
-
-
-// TODO: LEADERBOARD BUG BEING FIX
-/**
-The leaderboard is not ranking the players scores properly.
-ISSUES:
-  - Players with low scores are being placed ontop of players with higher scores.
-  - The modal box diplaying the scores is messing with the page layout pushing elements out of wack.
-  - Combine the leaderboard functions and build an interface
-*/
-
 class Leaderboard {
+  /**
+  * @description Represents the game leaderboard
+  * @construtor
+  */
   constructor() {
-    /* something here *
-    if (typeof(Storage) !== "undefined") {
-      if (localStorage.cardGameSet == "undefined") {
-        // set a dummy leader board
-        let dummyBoard = dummyLeaderboard();
-        setLeaderboard(dummyBoard);
-      } else {
-        // load the leaderboard from local storage
-        displayLeaderboard();
-      }
-    } else {
-      console.log("Unable to create leaderboard. Sorry you don't have local storage support");
-    }
-    */
     $('.leaderboard').html("");
     $('.leaderboard').append('<caption>LEADERBOARD</caption>');
     $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
   }
-  get scores() {
+  /**
+  * @description getter to retrieve scoreboard from localStorage
+  * @returns {array of objects} scores
+  */
+  get retrieveScores() {
     let scores = [];
     let length = localStorage.getItem("leaderboardSize");
-    for (let i=0; i < length; i++) {
-      scores[i] = {
-        name: localStorage.getItem("name"+i),
-        time: localStorage.getItem("time"+i),
-        moves: localStorage.getItem("moves"+i),
-        stars: localStorage.getItem("stars"+i)
+    if (length > 0) {
+      for (let i=0; i < length; i++) {
+        scores[i] = {
+          name: localStorage.getItem("name"+i),
+          time: localStorage.getItem("time"+i),
+          moves: localStorage.getItem("moves"+i),
+          stars: localStorage.getItem("stars"+i)
+        };
       };
-    };
+    }else{
+      scores = false;
+    }
     return scores;
   }
-  displayScores() {
-    $('#myModal').modal();
-/*
-    let leaderboard = getLeaderboard();
-    let index = 1;
-    // empty the table prep headers for content
-    $('.leaderboard').html("");
-    $('.leaderboard').append('<caption>LEADERBOARD</caption>');
-    $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
-    // get leaderboard format its content and output
-    leaderboard.forEach(function(item) {
+  /**
+  * @description Takes the values and compares them according to moves and time into new array, update.
+  * @param {array of object} latest - Scores from the game just played
+  * @param {array of objects} localScores - Scores from previous games saved in localStorage
+  * @returns {array of objects} update
+  */
+  compareScores(latest, localScores) {
+    let localSize = parseInt(localStorage.getItem("leaderboardSize"));
+    let latestPush = true; // to stop interation if pushed to update array
+    let moves = parseInt(latest[0].moves);
+    let time = parseInt(latest[0].time);
+    let update = [];
+    // take the latest and local scores and compare them
+    localScores.forEach( (local, index) => {
+      if (latestPush) {
+        if (moves < parseInt(local.moves)) {
+          update.push(latest[0]);
+          latestPush = false;
+        }else if (moves > parseInt(local.moves)) {
+          update.push(local);
+        }else if (moves == parseInt(local.moves)) {
+          if (time <= parseInt(local.time)) {
+            update.push(latest[0]);
+            latestPush = false;
+          }else{
+            update.push(local);
+          }
+        }
+      }
+      // Address issue of the leaderboard scores not moving up when the latest is inserted before the end
+      if (!latestPush && index < (localSize - 1)) {
+        update.push(local)
+      }
+      // Address issue of using the forEach loop when localsize is less than 5
+      if ( (index + 1) == localSize && 5 > localSize) {
+        if (latestPush) {
+          update.push(latest[0]);
+        }else{
+          update.push(local);
+        }
+      } 
+    });
+    return update;
+  }
+  /**
+  * @description gathers the last games score results and leaderboard stored in localStorage updating the modal and localstorage
+  */
+  prepareScores() {
+    let update;
+    // gather the latest score results
+    let latest = [{
+      name: $('.player-name').prop('value'),
+      time: theTimer.retrieveTime(),
+      moves: gameSettings.moves,
+      stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 18)?1:2
+    }];
+    // gather local scores, if any
+    let localScores = this.retrieveScores;
+    // make sure localstorage data exists before comparing
+    if (localScores) {
+      update = this.compareScores(latest, localScores);
+    }else{
+      update = latest;
+    }
+    this.updateModal(update);
+    this.updateLocalStorage(update);
+  }
+  /**
+  * @description Updates the modal window using HTML tags adding the new scoreboard information
+  * @param {array of objects} update - Updated scoreboard
+  */
+  updateModal(update) {
+    // set latest score information at top of modal
+    $('.modal-info-time').text(theTimer.retrieveTime());
+    $('.modal-info-moves').text(gameSettings.moves);
+    // append each score to the modal, done once per game completion
+    update.forEach( (item, index) => {
       $('.leaderboard').append('<tr class="board-row"></tr>');
-      $('.board-row:last-child').append($('<td></td>').text(index));
+      $('.board-row:last-child').append($('<td></td>').text(index + 1));
       $('.board-row:last-child').append($('<td></td>').text(item.name));
       $('.board-row:last-child').append($('<td></td>').text(item.moves));
       $('.board-row:last-child').append($('<td></td>').text(item.time));
       $('.board-row:last-child').append($('<td></td>').text(item.stars));
-      index++;
     });
-*/
-    }
-}
-
-
-
-
-
-/**
-* @description create a dummy array of objects to setup the initial leaderboard
-* @returns {array} an array of objects
-*/
-let dummyLeaderboard = function() {
-  let dummyInfo = [{
-    name: "Derelick",
-    time: "01:01",
-    moves: 12,
-    stars: 3
-  },{
-    name: "Dave",
-    time: "01:16",
-    moves: 17,
-    stars: 2
-  },{
-    name: "Millicent",
-    time: "01:40",
-    moves: 22,
-    stars: 1
-  }];
-  localStorage.cardGameSet = true;
-  return dummyInfo;
-}
-
-/**
-* @description Updates the localStorage with new leaderboard results
-* @param {array} boardUpdate - takes an array of assorted objects with latest results
-*/
-let setLeaderboard = function(boardUpdate) {
-  let length = boardUpdate.length;
-  localStorage.setItem("leaderboardSize", length);
-  for (let i=0; i<length; i++) {
-    localStorage.setItem("name" + i, boardUpdate[i].name);
-    localStorage.setItem("time" + i, boardUpdate[i].time);
-    localStorage.setItem("moves" + i, boardUpdate[i].moves);
-    localStorage.setItem("stars" + i, boardUpdate[i].stars);
-  };
-}
-
-/**
-* @description Get the leaderboard from localStorage
-* @return {array} of objects.
-*/
-let getLeaderboard = function() {
-  let leaderboard = [];
-  let length = localStorage.getItem("leaderboardSize");
-  for (let i=0; i < length; i++) {
-    leaderboard[i] = {
-      name: localStorage.getItem("name"+i),
-      time: localStorage.getItem("time"+i),
-      moves: localStorage.getItem("moves"+i),
-      stars: localStorage.getItem("stars"+i)
-    };
-  };
-  return leaderboard;
-}
-
-/**
-* @description Update leaderboard with current score information
-*/
-let updateLeaderboard = function() {
-  // prep latest score content
-  let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
-  let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
-  let theTime = String(mins + ":" + secs);
-  let lastScore = {
-    name: $('.player-name').prop('value'),
-    time: theTime,
-    moves: gameSettings.moves,
-    stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 18)?1:2
   }
-  let currentBoard = getLeaderboard();
-  let index = 0;
-  let found = false;
-  let count = 0;
-  currentBoard.forEach(function(item, indice) {
-    // check current score against scores in leaderboard
-    if (lastScore.moves !== 0 && item.moves >= lastScore.moves) {
-      if (item.moves == lastScore.moves) {
-        // when both scores have the same number of moves check the time taken to complete
-        if (item.time >= lastScore.time) {
-          if (item.time == lastScore.time) {
-            found = true;
-            index = count;
-          } else {
-            if (!found) {
-              found = true;
-              index = count;
-            }
-          }
-        }
-      } else {
-        if (!found) {
-          found = true;
-          index = count;
-        }
-      }
-    }
-    count++
-  });
-  // clear text from input box
-  $('.player-name').prop('value', "");
-  // add new score to the leaderboard array
-  currentBoard.splice(index, 0, lastScore);
-  // make sure leaderboard has no more than 5 entries
-  if (currentBoard.length > 5) {
-    currentBoard.splice(5, 1);
-  };
-  setLeaderboard(currentBoard);
-}
-
-/**
-* @description Format leaderboard contents and display
-*/
-let displayLeaderboard = function() {
-  let leaderboard = getLeaderboard();
-  let index = 1;
-  // empty the table prep headers for content
-  $('.leaderboard').html("");
-  $('.leaderboard').append('<caption>LEADERBOARD</caption>');
-  $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
-  // get leaderboard format its content and output
-  leaderboard.forEach(function(item) {
-    $('.leaderboard').append('<tr class="board-row"></tr>');
-    $('.board-row:last-child').append($('<td></td>').text(index));
-    $('.board-row:last-child').append($('<td></td>').text(item.name));
-    $('.board-row:last-child').append($('<td></td>').text(item.moves));
-    $('.board-row:last-child').append($('<td></td>').text(item.time));
-    $('.board-row:last-child').append($('<td></td>').text(item.stars));
-    index++;
-  });
+  /**
+  * @description Updates the localStorage with the latest scoreboard
+  * @param {array of objects} update - Updated scoreboard
+  */
+  updateLocalStorage(update) {
+    localStorage.setItem("leaderboardSize", update.length);
+    update.forEach( (item, i) => {
+      localStorage.setItem("name" + i, item.name);
+      localStorage.setItem("time" + i, item.time);
+      localStorage.setItem("moves" + i, item.moves);
+      localStorage.setItem("stars" + i, item.stars);
+    })
+  }
+  /**
+  * @description Brings the modal window to the front displaying the leaderboard and last game scores
+  */
+  displayScores() {
+    this.prepareScores();
+    $('#myModal').modal();
+  }
 }
 
 // prepare game after page load
