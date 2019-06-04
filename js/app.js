@@ -221,6 +221,7 @@ let setModalContent = function() {
     if (typeof(Storage) !== "undefined") {
       updateLeaderboard();
     }
+  // sets latest score on top of leaderboard
   $('.modal-info-time').text($('.timer').text());
   $('.modal-info-moves').text(gameSettings.moves);
   if (typeof(Storage) !== "undefined") {
@@ -271,13 +272,9 @@ const theTimer = {
 };
 
 
-
-// TODO: LEADERBOARD BUG BEING FIX
 /**
-The leaderboard is not ranking the players scores properly.
-ISSUES:
+ISSUES: TODO: LEADERBOARD BUG BEING FIX
   - The modal box diplaying the scores is messing with the page layout pushing elements out of wack.
-  - Combine the leaderboard functions and build an interface
 */
 
 class Leaderboard {
@@ -302,26 +299,31 @@ class Leaderboard {
   compareScores(latest, localScores) {
     let localSize = parseInt(localStorage.getItem("leaderboardSize"));
     let latestPush = true; // to stop interation if pushed to update array
-    let update = []
+    let moves = parseInt(latest[0].moves);
+    let time = parseInt(latest[0].time);
+    let update = [];
     // take the latest and local scores and compare them
     localScores.forEach( (local, index) => {
       if (latestPush) {
-        if (latest[0].moves < local.moves) {
+        if (moves < parseInt(local.moves)) {
           update.push(latest[0]);
           latestPush = false;
-        }else if (latest[0].moves > local.moves) {
+        }else if (moves > parseInt(local.moves)) {
           update.push(local);
-        }else if (latest[0].moves == local.moves) {
-          if (latest[0].time <= local.time) {
+        }else if (moves == parseInt(local.moves)) {
+          if (time <= parseInt(local.time)) {
             update.push(latest[0]);
             latestPush = false;
           }else{
             update.push(local);
           }
         }
-      }else{
-        update.push(local);
       }
+      // Address issue of the leaderboard scores not moving up when the latest is inserted before the end
+      if (!latestPush && index < (localSize - 1)) {
+        update.push(local)
+      }
+      // Address issue of using the forEach loop when localsize is less than 5
       if ( (index + 1) == localSize && 5 > localSize) {
         if (latestPush) {
           update.push(latest[0]);
@@ -333,6 +335,7 @@ class Leaderboard {
     return update;
   }
   prepareScores() {
+    let update;
     // gather the latest score results
     let latest = [{
       name: $('.player-name').prop('value'),
@@ -344,13 +347,38 @@ class Leaderboard {
     let localScores = this.retrieveScores;
     // make sure localstorage data exists before comparing
     if (localScores) {
-      return this.compareScores(latest, localScores);
+      update = this.compareScores(latest, localScores);
     }else{
-      return latest;
+      update = latest;
     }
+    this.updateModal(update);
+    this.updateLocalStorage(update);
   }
-  
+  updateModal(update) {
+    // set latest score information at top of modal
+    $('.modal-info-time').text(theTimer.retrieveTime());
+    $('.modal-info-moves').text(gameSettings.moves);
+    // append each score to the modal, done once per game completion
+    update.forEach( (item, index) => {
+      $('.leaderboard').append('<tr class="board-row"></tr>');
+      $('.board-row:last-child').append($('<td></td>').text(index + 1));
+      $('.board-row:last-child').append($('<td></td>').text(item.name));
+      $('.board-row:last-child').append($('<td></td>').text(item.moves));
+      $('.board-row:last-child').append($('<td></td>').text(item.time));
+      $('.board-row:last-child').append($('<td></td>').text(item.stars));
+    });
+  }
+  updateLocalStorage(update) {
+    localStorage.setItem("leaderboardSize", update.length);
+    update.forEach( (item, i) => {
+      localStorage.setItem("name" + i, item.name);
+      localStorage.setItem("time" + i, item.time);
+      localStorage.setItem("moves" + i, item.moves);
+      localStorage.setItem("stars" + i, item.stars);
+    })
+  }
   displayScores() {
+    this.prepareScores();
     $('#myModal').modal();
   }
 }
@@ -359,14 +387,14 @@ class Leaderboard {
 function testData() {
   // latest results
   theTimer.minutes = 1;
-  theTimer.seconds = 20;
-  gameSettings.moves = "10";
+  theTimer.seconds = 10;
+  gameSettings.moves = "5";
   $('.player-name').prop('value', "Sakura");
   // local scores
   localStorage.setItem("leaderboardSize", 5);
   localStorage.setItem("name0", "Amy");
   localStorage.setItem("time0", "01:20");
-  localStorage.setItem("moves0", 10);
+  localStorage.setItem("moves0", 11);
   localStorage.setItem("stars0", 3);
   localStorage.setItem("name1", "Tsunade");
   localStorage.setItem("time1", "01:55");
