@@ -43,7 +43,6 @@ let initGame = function() {
 
   // set listener for Leaderboard modal
   $('.continue').on('click', function() {
-    // setModalContent();
     gameLeaderboard.displayScores();
   })
 };
@@ -210,25 +209,6 @@ let ratePlayer = function() {
   } else {
     // do nothing
   }
-}
-
-/** TODO: YOU MAY DELETE THIS IN TIME!
-* @description prep the modal content
-*/
-let setModalContent = function() {
-  // update the leaderboard if avaiable
-    if (typeof(Storage) !== "undefined") {
-      updateLeaderboard();
-    }
-  // sets latest score on top of leaderboard
-  $('.modal-info-time').text($('.timer').text());
-  $('.modal-info-moves').text(gameSettings.moves);
-  if (typeof(Storage) !== "undefined") {
-    displayLeaderboard();
-  } else {
-    $('.leaderboard').append("<tr><td>Leaderboard unavailable. Your browser does not support Web Storage</td></tr>");
-  }
-  $('#myModal').modal();
 }
 
 // timer object, starts, stops and restarts the timer
