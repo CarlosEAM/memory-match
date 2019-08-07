@@ -1,3 +1,20 @@
+let model = {}
+
+
+let view = {
+  init: function() {
+    // Start the view
+  }
+}
+
+
+let octopus = {
+  init: function() {
+    // Load up the game
+  }
+}
+
+
 /* TODO:
     2. Give players some options:
       2.1 select another set of memory pictures.

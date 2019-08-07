@@ -4,18 +4,40 @@
   src: url( '../fonts/Lobster-Regular.ttf' );
 }
 
-.html-body {
+body {
   /*background: #004900;*/
-  background: #0c4f0c;
+  background-color: #0c4f0c;
 }
 
-.html-body,
+body,
 h1 {
   font-family: Lobster;
 }
 
-/* header */
-.page-title,
+/*page NAVBAR*/
+.page-navbar button {
+	background-color: rgba(255,255,255,.6);
+	border: 1px solid #000;
+	box-shadow: 0 2px 6px #000;
+}
+
+.page-navbar ul {
+	margin-bottom: 64px;
+}
+
+.page-navbar ul li {
+	background-color: #d4bb0a;
+	color: #000;
+	margin-bottom: 12px;
+	margin-top: 12px;
+}
+
+.page-navbar ul li a {
+	color: #000;
+}
+
+/* page HEADER */
+.game-brand,
 .game-info-wrapper {
   color: #d4bb0a;
   text-shadow: 0 2px 2px #000;
@@ -178,37 +200,63 @@ h1 {
 
 /*footer*/
 footer {
-  padding-top: 42px;
+  margin: 42px auto 16px;
 }
 
 footer p {
   color: #d4bb0a;
+  margin-bottom: 0;
   text-shadow: 0 2px 2px #000;
 }
 
+
+
 /* RESPONSIVE PART */
 
-/* tables */
-@media screen and (min-width: 768px) {
-  .cards-wrapper {
-    height: 110px;
-  }
+
+/*Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) {}
+
+/*Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+	/*navigation*/
+	.page-navbar ul {
+		margin-bottom: 0;
+	}
+
+	.page-navbar ul li {
+		margin-bottom: 0;
+		margin-top: 0;
+	}
+
+	.cards-wrapper {
+		height: 110px;
+	}
 }
 
+/*Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+	.reset {
+		padding: 18px 8px;
+	}
 
-/* Medium screens */
-@media screen and (min-width: 992px) {
-  .reset {
-    padding: 18px 8px;
-  }
-  .moves-counter-wrapper,
-  .timer-wrapper,
-  .star-rating-wrapper,
-  .reset {
-    margin-top: 32px;
-    font-size: 1.8em;
-  }
-  .cards-wrapper {
-    height: 124px;
-  }
+	.moves-counter-wrapper,
+	.timer-wrapper,
+	.star-rating-wrapper,
+	.reset {
+		margin-top: 32px;
+		font-size: 1.8em;
+	}
+
+	.cards-wrapper {
+		height: 124px;
+	}
 }
+
+/*Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {}
+
+
+
+
+

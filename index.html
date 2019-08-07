@@ -1,165 +1,191 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="description" content="Card memory game">
-  <meta name="keyword" content="card, memory, game, carloseam, carlos, alford, game, udacity, cc0d3haku">
-  <meta name="author" content="Carlos E Alford M (cc0d3haku)">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Match</title>
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="js/app.js"></script>
-  <link rel="stylesheet" href="css/app.css">
-  <link rel="stylesheet" href="css/animate.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<meta charset="utf-8">
+	<meta name="description" content="Card memory game">
+	<meta name="keyword" content="card, memory, game, carloseam, carlos, alford, game, udacity, cc0d3haku">
+	<meta name="author" content="Carlos E Alford M (cc0d3haku)">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Memory Match</title>
+
+	<!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/app.css">
+	<link rel="stylesheet" href="css/animate.css">
+
 </head>
-<body class="html-body">
-<div class="main-content container">
+<body>
 
-  <div class="row">
-  <div class="col-xs-12 col-md-3">
-    <header class="row">
-      <h1 class="col-xs-12 text-center page-title">Memory Match</h1>
-    </header>
+<div class="container page-container">
 
-    <section class="game-info-wrapper row text-center">
-      <!-- moves counter -->
-      <div class="moves-counter-wrapper col-xs-3 col-md-12">
-        <p>Moves: <span class="moves-counter">0</span></p>
-      </div>
+	<nav class="navbar navbar-expand-md page-navbar">
+		<h1 class="navbar-brand game-brand">Memory Match</h1>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    		<span class="navbar-toggler-icon">|||</span>
+    	</button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto text-center">
+				<li class="nav-item active">
+					<a class="nav-link" href="#">Scoreboard <span class="sr-only">(current)</span></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">Settings</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">About</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
 
-      <!-- game timer -->
-      <div class="timer-wrapper col-xs-3 col-md-12">
-        <p class="timer">Time: <span class="timer-minutes">00</span>:<span class="timer-seconds">00</span></p>
-      </div>
+<div class="row">
 
-      <!-- game star rating -->
-      <div class="star-rating-wrapper col-xs-3 col-md-12">
-        <p>
-          <span class="star-rating glyphicon glyphicon-star" aria-hidden="true"></span>
-          <span class="star-rating glyphicon glyphicon-star" aria-hidden="true"></span>
-          <span class="star-rating glyphicon glyphicon-star" aria-hidden="true"></span>
-        </p>
-      </div>
+<div class="col-12 col-lg-4">
 
-      <!-- reset button -->
-      <div class="col-xs-3 col-md-12">
-        <button type="button" class="btn-reset reset">Reset</button>
-      </div>
-    </section>
-  </div>
+	<section class="row text-center game-info-wrapper">
 
-  <div class="col-xs-12 col-md-9">
-    <section class="game-board">
+		<!-- moves counter -->
+		<div class="col-3 col-lg-12 moves-counter-wrapper">
+			<p>Moves: <span class="moves-counter">0</span></p>
+		</div>
 
-      <div class="cards" data-card="1">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/yukisan.png" class="card-face" alt="yukisan">
-        </div>
-      </div>
-      <div class="cards" data-card="2">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/secretary.png" class="card-face" alt="secretary">
-        </div>
-      </div>
-      <div class="cards" data-card="3">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/spiral-eyes.png" class="card-face" alt="spiral eye">
-        </div>
-      </div>
-      <div class="cards" data-card="4">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/plant-me.png" class="card-face" alt="plant me">
-        </div>
-      </div>
+		<!-- game timer -->
+		<div class="col-3 col-lg-12 timer-wrapper">
+			<p class="timer">Time: <span class="timer-minutes">00</span>:<span class="timer-seconds">00</span></p>
+		</div>
 
-      <div class="cards" data-card="5">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/lady-ninja.png" class="card-face" alt="lady ninja">
-        </div>
-      </div>
-      <div class="cards" data-card="6">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/swirl-lady.png" class="card-face" alt="swirl lady">
-        </div>
-      </div>
-      <div class="cards" data-card="7">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/haku.png" class="card-face" alt="haku">
-        </div>
-      </div>
-      <div class="cards" data-card="8">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/dragon.png" class="card-face" alt="dragon">
-        </div>
-      </div>
+		<!-- space holder -->
+		<div class="col-3 col-lg-12 star-rating-wrapper"></div>
 
-      <div class="cards" data-card="1">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/yukisan.png" class="card-face" alt="yukisan">
-        </div>
-      </div>
-      <div class="cards" data-card="2">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/secretary.png" class="card-face" alt="secretary">
-        </div>
-      </div>
-      <div class="cards" data-card="3">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/spiral-eyes.png" class="card-face" alt="spiral eyes">
-        </div>
-      </div>
-      <div class="cards" data-card="4">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/plant-me.png" class="card-face" alt="plant me">
-        </div>
-      </div>
+		<!-- reset button -->
+		<div class="col-3 col-lg-12">
+			<button type="button" class="btn-reset reset">Reset</button>
+		</div>
 
-      <div class="cards" data-card="5">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/lady-ninja.png" class="card-face" alt="lady ninja">
-        </div>
-      </div>
-      <div class="cards" data-card="6">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/swirl-lady.png" class="card-face" alt="swirl lady">
-        </div>
-      </div>
-      <div class="cards" data-card="7">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/haku.png" class="card-face" alt="haku">
-        </div>
-      </div>
-      <div class="cards" data-card="8">
-        <div class="cards-wrapper">
-          <img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
-          <img src="img/dragon.png" class="card-face" alt="dragon">
-        </div>
-      </div>
+	</section>
 
-    </section>
-  </div>
-  </div>
+</div>
 
-  <footer class="row text-center">
-    <p class="col-xs-12">All rights reserved Carlos EAM. Copyright 2017-2019</p>
-  </footer>
+<div class="col-12 col-lg-8">
+
+	<!-- The gameboard -->
+	<main class="row">
+
+		<section class="game-board">
+
+			<div class="cards" data-card="1">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/yukisan.png" class="card-face" alt="yukisan">
+				</div>
+			</div>
+			<div class="cards" data-card="2">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/secretary.png" class="card-face" alt="secretary">
+				</div>
+			</div>
+			<div class="cards" data-card="3">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/spiral-eyes.png" class="card-face" alt="spiral eye">
+				</div>
+			</div>
+			<div class="cards" data-card="4">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/plant-me.png" class="card-face" alt="plant me">
+				</div>
+			</div>
+
+			<div class="cards" data-card="5">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/lady-ninja.png" class="card-face" alt="lady ninja">
+				</div>
+			</div>
+			<div class="cards" data-card="6">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/swirl-lady.png" class="card-face" alt="swirl lady">
+				</div>
+			</div>
+			<div class="cards" data-card="7">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/haku.png" class="card-face" alt="haku">
+				</div>
+			</div>
+			<div class="cards" data-card="8">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/dragon.png" class="card-face" alt="dragon">
+				</div>
+			</div>
+
+			<div class="cards" data-card="1">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/yukisan.png" class="card-face" alt="yukisan">
+				</div>
+			</div>
+			<div class="cards" data-card="2">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/secretary.png" class="card-face" alt="secretary">
+				</div>
+			</div>
+			<div class="cards" data-card="3">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/spiral-eyes.png" class="card-face" alt="spiral eye">
+				</div>
+			</div>
+			<div class="cards" data-card="4">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/plant-me.png" class="card-face" alt="plant me">
+				</div>
+			</div>
+
+			<div class="cards" data-card="5">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/lady-ninja.png" class="card-face" alt="lady ninja">
+				</div>
+			</div>
+			<div class="cards" data-card="6">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/swirl-lady.png" class="card-face" alt="swirl lady">
+				</div>
+			</div>
+			<div class="cards" data-card="7">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/haku.png" class="card-face" alt="haku">
+				</div>
+			</div>
+			<div class="cards" data-card="8">
+				<div class="cards-wrapper">
+					<img src="img/cc0d3haku-card-logo.png" class="card-back" alt="back of cards">
+					<img src="img/dragon.png" class="card-face" alt="dragon">
+				</div>
+			</div>
+
+		</section>
+	</main>
+
+</div>
+
+</div>
+
+	<footer class="row text-center">
+		<p class="col-12">Designed for your enjoyment by <a href="#">Carlos EAM.</a></p>
+		<p class="col-12">Copyright 2017-2019</p>
+	</footer>
 
   <!-- Bootstrap Modal, custom to receive user input -->
   <div class="modal fade text-center" id="inputModal" role="dialog" aria-labelledby="userinputmodal" tabindex="-1">
@@ -216,5 +242,11 @@
   </div>
 
 </div>
+
+	<!-- jQuery first, then Popper.js, then Bootstrap JS, finally app.js -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
