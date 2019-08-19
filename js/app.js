@@ -1,9 +1,52 @@
-let model = {}
+let model = {
+  currentCardFlip: null,
+  lastCardFlip: null,
+  timerStarted: false,
+}
 
-
-let view = {
+// Takes care of the cards deck viewing experience
+let cardDeckView = {
   init: function() {
     // Start the view
+    console.log("STARTING THE VIEW");
+
+    this.gameBoard = document.querySelector('.game-board');
+    this.cardDeck = document.querySelectorAll('.cards');
+
+    // Use the collection to listen for and flip the cards
+    this.cardWrapper = document.querySelectorAll('.cards-wrapper');
+
+    // add event listener to each card
+    for (let i=0; i<this.cardWrapper.length; i++) {
+      this.cardWrapper[i].addEventListener('click', octopus.activeCard);
+    }
+    console.log("CARD LISTENERS READY");
+
+  },
+  render: function() {
+    console.log("RENDERING THE VIEW");
+  }
+}
+
+
+// Take care of the timer.
+let timerView = {
+  init: function() {
+    console.log("STARTING THE TIMER");
+  },
+  render: function() {
+    console.log("RENDER THE TIMER");
+  }
+}
+
+
+// Take care of rendering the score
+let scoreView = {
+  init: function() {
+    console.log("STARTING THE SCORE");
+  },
+  render: function() {
+    console.log("RENDER THE SCORE");
   }
 }
 
@@ -11,6 +54,85 @@ let view = {
 let octopus = {
   init: function() {
     // Load up the game
+    console.log("STARTING THE OCTOPUS");
+
+    cardDeckView.init();
+    timerView.init();
+    scoreView.init();
+  },
+  activeCard: function(event) {
+    console.log("ACTIVE CARD");
+
+    event.stopPropagation();
+    let card = event.srcElement.parentElement.parentElement;
+
+    // store the calling object
+    if (octopus.getLastCardFlip()) {
+      octopus.setCurrentCardFlip(card);
+    }else{
+      octopus.setLastCardFlip(card);
+    }
+
+    // lets flip it
+    octopus.flipCard(card);
+
+    // check if the same card was clicked on twice
+    if (octopus.getLastCardFlip() === octopus.getCurrentCardFlip()) {
+      octopus.resetDefaults();
+      return;
+    }
+
+    // Check for a match
+    if (octopus.getCurrentCardFlip()) {
+      if (octopus.checkForMatch()) {
+        // Found a match
+        octopus.getLastCardFlip().children[0].removeEventListener('click', octopus.activeCard);
+        this.removeEventListener('click', octopus.activeCard);
+      }else{
+        // Two cards dont match
+        let cardA = octopus.getLastCardFlip();
+        let cardB = octopus.getCurrentCardFlip();
+        setTimeout(()=>{
+          octopus.flipCard(cardA);
+          octopus.flipCard(cardB);
+        }, 800);
+        
+      }
+      // reset card dafults
+      octopus.resetDefaults();
+    }
+
+  },
+  flipCard: function(card) {
+    // to create the flip effect we must use the img parents parent as card
+    if (card.getAttribute('class').includes('flip-card')) {
+      card.setAttribute('class', 'cards');
+    }else{
+      card.setAttribute('class', 'cards flip-card');
+    }
+  },
+  checkForMatch: function() {
+    if (this.getLastCardFlip().dataset.card === this.getCurrentCardFlip().dataset.card) {
+      return true;
+    }else{
+      return false;
+    }
+  },
+  resetDefaults: function() {
+    this.setLastCardFlip(null);
+    this.setCurrentCardFlip(null);
+  },
+  setCurrentCardFlip: function(card) {
+    model.currentCardFlip = card;
+  },
+  setLastCardFlip: function(card) {
+    model.lastCardFlip = card;
+  },
+  getCurrentCardFlip: function() {
+    return model.currentCardFlip;
+  },
+  getLastCardFlip: function() {
+    return model.lastCardFlip;
   }
 }
 
@@ -405,5 +527,12 @@ class Leaderboard {
   }
 }
 
+
 // prepare game after page load
-$(initGame);
+// $(initGame);
+
+
+// LAUNCH GAME
+window.onload = function() {
+  octopus.init();
+}

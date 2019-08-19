@@ -1,7 +1,7 @@
 /*Chosen font for the games casino theme*/
 @font-face {
   font-family: Lobster;
-  src: url( '../fonts/Lobster-Regular.ttf' );
+  src: url('../fonts/Lobster-Regular.ttf') format('truetype');
 }
 
 body {
@@ -15,25 +15,31 @@ h1 {
 }
 
 /*page NAVBAR*/
-.page-navbar button {
+.navbar-toggler{
+	background-color: #fff;
 	background-color: rgba(255,255,255,.6);
 	border: 1px solid #000;
 	box-shadow: 0 2px 6px #000;
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 
 .page-navbar ul {
 	margin-bottom: 64px;
+	margin-top: 32px;
 }
 
 .page-navbar ul li {
-	background-color: #d4bb0a;
-	color: #000;
 	margin-bottom: 12px;
 	margin-top: 12px;
 }
 
-.page-navbar ul li a {
+.page-navbar ul li button {
+	background-color: #d4bb0a;
+	box-shadow: 0 4px 6px #000;
 	color: #000;
+	width: 100%;
 }
 
 /* page HEADER */
@@ -42,6 +48,8 @@ h1 {
   color: #d4bb0a;
   text-shadow: 0 2px 2px #000;
 }
+
+
 
 /* game board */
 .game-board {
@@ -110,10 +118,6 @@ h1 {
 /* MODALS */
 .modal {
   background-color: rgba(212, 187, 10, 0.8);
-}
-
-.modal-body h1 {
-  text-shadow: 2px 2px 2px #000;
 }
 
 .modal-content {
@@ -222,10 +226,12 @@ footer p {
 	/*navigation*/
 	.page-navbar ul {
 		margin-bottom: 0;
+		margin-top: 0;
 	}
 
 	.page-navbar ul li {
 		margin-bottom: 0;
+		margin-right: 16px;
 		margin-top: 0;
 	}
 
