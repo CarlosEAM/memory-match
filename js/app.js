@@ -1,7 +1,9 @@
 let model = {
+  gameboard: null,
   currentCardFlip: null,
   lastCardFlip: null,
-  timerStarted: false,
+  timerActive: false,
+  timerCounter: null,
   score: 3,
   activeDeckTheme: 'poker',
   deckOfCards: [
@@ -84,9 +86,6 @@ let cardDeckView = {
     let granparent, parent, childA, childB;
     let shuffle, loop = 0;
 
-    console.log();
-    console.log(cardOrder);
-
     // Loop it twice because its a memory game and the cards must repeat
     while (loop < 2) {
       cardDeck.cardPicture.forEach((card, i) => {
@@ -132,10 +131,38 @@ let cardDeckView = {
 // Take care of the timer.
 let timerView = {
   init: function() {
-    console.log("STARTING THE TIMER");
+    // Get the timer view
+    this.minutes = document.getElementsByClassName('timer-minutes')[0];
+    this.seconds = document.getElementsByClassName('timer-seconds')[0];
+
+    // Set a listener on the gameboard so we know when the first card is flipped
+    let gameboard = octopus.getGameboard();
+    gameboard.addEventListener('click', octopus.startTimer, true);
+    
+    // Reset the timer before anything else
+    this.minutes.innerText = "00";
+    this.seconds.innerText = "00";
   },
   render: function() {
-    console.log("RENDERING THE TIMER VIEW");
+    let s = parseInt(timerView.seconds.innerText);
+    let m = parseInt(timerView.minutes.innerText);
+
+    // When 59secs gone by then minute ticks over
+    if (s == 59) {
+      m = octopus.checkTime(m);
+    }else if (m == 10) {
+      // This is a quick game so lets assume that 10 minutes indicates player left game
+      octopus.stopTimer();
+    }else{
+      m = "00";
+    }
+
+    // Carry on with the seconds
+    s = octopus.checkTime(s);
+    
+    // Update the timer view
+    timerView.seconds.innerText = s;
+    timerView.minutes.innerText = m;
   }
 }
 
@@ -155,6 +182,12 @@ let octopus = {
   init: function() {
     // Load up the game
     console.log("STARTING THE OCTOPUS");
+
+    model.gameboard = document.getElementsByClassName('game-board')[0];
+
+    // TODO: REMOVE LISTENER. ONLY MEANT FOR TESTING NOT FOR PRODUCTION
+    document.getElementsByClassName('btn-reset')[0].addEventListener('click', octopus.stopTimer);
+    
 
     cardDeckView.init();
     timerView.init();
@@ -204,6 +237,9 @@ let octopus = {
     }
 
   },
+  getGameboard: function() {
+    return model.gameboard;
+  },
   flipCard: function(card) {
     // to create the flip effect we must use the img parents parent as card
     if (card.getAttribute('class').includes('flip-card')) {
@@ -248,6 +284,26 @@ let octopus = {
   },
   getActiveDeckTheme: function() {
     return model.activeDeckTheme;
+  },
+  startTimer: function() {
+    // Remove the listener to stop multiple calls
+    let gameboard = octopus.getGameboard();
+    gameboard.removeEventListener('click', octopus.startTimer, true);
+
+    // Start the timer interval
+    model.timerCounter = setInterval(timerView.render, 1000);
+  },
+  stopTimer: function() {
+    // Remove the interval and stopping the timer
+    clearInterval(model.timerCounter);
+    model.timerCounter = null;
+  },
+  checkTime: function(t) {
+    t++;
+    if (t < 10) {
+      t = "0" + t;
+    }
+    return t;
   }
 }
 
