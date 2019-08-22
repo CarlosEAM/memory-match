@@ -2,6 +2,56 @@ let model = {
   currentCardFlip: null,
   lastCardFlip: null,
   timerStarted: false,
+  score: 3,
+  activeDeckTheme: 'poker',
+  deckOfCards: [
+    {
+      theme: "poker",
+      size: 8,
+      coverDesign: {
+        image: '../images/card-themes/poker/poker-card-logo.png',
+        alt: 'card cover design'
+      },
+      cardPicture: [
+        {
+          image: '../images/card-themes/poker/yukisan.png',
+          alt: 'yukisan card'
+        },
+        {
+          image: '../images/card-themes/poker/secretary.png',
+          alt: 'secretary'
+        },
+        {
+          image: '../images/card-themes/poker/spiral-eyes.png',
+          alt: 'spiral eyes'
+        },
+        {
+          image: '../images/card-themes/poker/lady-ninja.png',
+          alt: 'lady ninja'
+        },
+        {
+          image: '../images/card-themes/poker/plant-me.png',
+          alt: 'plant me'
+        },
+        {
+          image: '../images/card-themes/poker/swirl-lady.png',
+          alt: 'swirl lady'
+        },
+        {
+          image: '../images/card-themes/poker/haku.png',
+          alt: 'haku'
+        },
+        {
+          image: '../images/card-themes/poker/dragon.png',
+          alt: 'dragon'
+        },
+      ],
+      author: {
+        name: 'Amy the Hatter',
+        site: 'htts://amythehatter.com'
+      }
+    },
+  ]
 }
 
 // Takes care of the cards deck viewing experience
@@ -11,20 +61,70 @@ let cardDeckView = {
     console.log("STARTING THE VIEW");
 
     this.gameBoard = document.querySelector('.game-board');
-    this.cardDeck = document.querySelectorAll('.cards');
 
-    // Use the collection to listen for and flip the cards
-    this.cardWrapper = document.querySelectorAll('.cards-wrapper');
+    this.render();
 
-    // add event listener to each card
-    for (let i=0; i<this.cardWrapper.length; i++) {
-      this.cardWrapper[i].addEventListener('click', octopus.activeCard);
-    }
     console.log("CARD LISTENERS READY");
 
   },
   render: function() {
-    console.log("RENDERING THE VIEW");
+    console.log("RENDERING THE CARDS VIEW");
+
+    // Clear gameBoard
+    this.gameBoard.html = "";
+
+    let activeTheme = octopus.getActiveDeckTheme();
+    let cardDeck = octopus.getDeckOfCards(activeTheme);
+    let nOfCards = cardDeck.size;
+    let cardOrder = [];
+    for (let i=1; i<=nOfCards*2; i++) {
+      cardOrder.push(i);
+    }
+
+    let granparent, parent, childA, childB;
+    let shuffle, loop = 0;
+
+    console.log();
+    console.log(cardOrder);
+
+    // Loop it twice because its a memory game and the cards must repeat
+    while (loop < 2) {
+      cardDeck.cardPicture.forEach((card, i) => {
+        // Create granparent element
+        granparent = document.createElement('div');
+        granparent.setAttribute('data-card', i);
+        granparent.setAttribute('class', 'cards');
+
+        // give the granparent a random position on the deck, shuffles deck.
+        shuffle = Math.round(Math.random() * cardOrder.length)
+        granparent.style.order = cardOrder[shuffle];
+        cardOrder.splice(shuffle, 1);
+
+        // Create parents to hold the img children
+        parent = document.createElement('div');
+        parent.setAttribute('class', 'cards-wrapper');
+
+        // Add the event listener to the parent
+        parent.addEventListener('click', octopus.activeCard);
+
+        // Create the img children
+        childA = document.createElement('img');
+        childB = document.createElement('img');
+        childA.setAttribute('class', 'card-back');
+        childA.setAttribute('src', cardDeck.coverDesign.image);
+        childA.setAttribute('alt', cardDeck.coverDesign.alt);
+        childB.setAttribute('class', 'card-face');
+        childB.setAttribute('src', card.image);
+        childB.setAttribute('alt', card.alt);
+
+        // Get the family together
+        parent.appendChild(childA);
+        parent.appendChild(childB);
+        granparent.appendChild(parent);
+        this.gameBoard.appendChild(granparent);
+      });
+      loop++;
+    }
   }
 }
 
@@ -35,7 +135,7 @@ let timerView = {
     console.log("STARTING THE TIMER");
   },
   render: function() {
-    console.log("RENDER THE TIMER");
+    console.log("RENDERING THE TIMER VIEW");
   }
 }
 
@@ -46,7 +146,7 @@ let scoreView = {
     console.log("STARTING THE SCORE");
   },
   render: function() {
-    console.log("RENDER THE SCORE");
+    console.log("RENDERING THE SCORE VIEW");
   }
 }
 
@@ -59,6 +159,7 @@ let octopus = {
     cardDeckView.init();
     timerView.init();
     scoreView.init();
+    
   },
   activeCard: function(event) {
     console.log("ACTIVE CARD");
@@ -133,403 +234,22 @@ let octopus = {
   },
   getLastCardFlip: function() {
     return model.lastCardFlip;
-  }
-}
-
-
-/* TODO:
-    2. Give players some options:
-      2.1 select another set of memory pictures.
-      2.2 change game theme.
- */
-
-let gameSettings = {};
-let gameLeaderboard;
-
-/**
-* @description initialise the game
-*/
-let initGame = function() {
-  console.log(gameLeaderboard)
-  // init settings
-  let cardsDeck = $('.cards');
-  gameSettings.cardsToReset = $('.cards');
-  gameSettings.cardsDeckSize = cardsDeck.length;
-  gameSettings.previousCard = null;
-  gameSettings.cardsFlipped = 0;
-  gameSettings.MAX_CARDS_PAIRS = gameSettings.cardsDeckSize / 2;
-  gameSettings.cardPairsFound = 0;
-  // use to rate the player
-  gameSettings.moves = 0;
-
-  // create leaderboard if local storage support
-  if (typeof(Storage) !== "undefined") {
-    // leaderboard instance
-    gameLeaderboard = new Leaderboard();
-  } else {
-    gameLeaderboard = "Unable to create leaderboard. Sorry you don't have local storage support";
-    console.log(gameLeaderboard);
-  }
-
-  // shuffle cards
-  shuffleCards($('.cards'));
-
-  // set event listeners
-  cardsDeck.on('click', playerMove);
-
-  // set event listener on reset buttons
-  $('.reset').on('click', resetGame);
-
-  // set listener for Leaderboard modal
-  $('.continue').on('click', function() {
-    gameLeaderboard.displayScores();
-  })
-};
-
-/**
-* @description Check players progress on card flips
-* @param {Object} $(this) - the element caught on.click
-*/
-let playerMove = function() {
-  // only flip cards or check for pairs if there are still available.
-  if (gameSettings.cardPairsFound !== gameSettings.MAX_CARDS_PAIRS) {
-    flipCard($(this));
-    gameSettings.cardsFlipped++;
-    if (gameSettings.cardsFlipped < 2) {
-      gameSettings.previousCard = $(this);
-      $(this).off();
-    } else {
-      // diactivate reset button until animation is done
-      $('.reset').off('click', resetGame);
-      // reactivate reset after 1 second, which should be enough time for animation to complete
-      setTimeout(()=>{
-        $('.reset').on('click', resetGame);
-      }, 1000);
-      // update the moves and then check the rating
-      updateMovesCounter(true);
-      ratePlayer();
-      checkCardsMatch($(this));
-      gameSettings.cardsFlipped = 0;
-    }
-  }
-  // when all pairs found activate popup window
-  if (gameSettings.cardPairsFound == gameSettings.MAX_CARDS_PAIRS) {
-    theTimer.stop();
-    ratePlayer();
-    // wait ms for smooth transition
-    setTimeout(function(){
-      // wait for the last cards to confirm pairing before modal MESSAGE
-      $('#inputModal').modal();
-    }, 800);
-  }
-
-};
-
-/**
-* @description Flip over card to either hide or show it
-* @param {Object} card - the div element the user clicked
-*/
-let flipCard = function(card) {
-    // start timer on first card flip
-    theTimer.start();
-    card.toggleClass('flip-card');
-};
-
-/**
-* @description Shuffles the deck of cards regarless of size
-* @param {Array} cards - a collection of <div> elements
-*/
-let shuffleCards = function(cards) {
-  let shuffle = 0;
-  for (let deckSize=cards.length; deckSize > 0; deckSize--) {
-    shuffle = Math.round(Math.random() * (deckSize - 1));
-    $(cards[shuffle]).css('order',deckSize);
-    cards.splice(shuffle,1);
-  }
-};
-
-/**
-* @description Check flipped cards for pairs keeping track of found pairs
-* @param {Object} card - last card flipped
-*/
-let checkCardsMatch = function(card){
-  // to keep previous card value in this context
-  let previousCard = gameSettings.previousCard;
-  if (card.data('card') == previousCard.data('card')){
-    // if pair is found
-    previousCard.off();
-    card.off();
-    // keep track of found pairs
-    gameSettings.cardPairsFound++;
-    setTimeout(function(){
-      previousCard.toggleClass('rubberBand animated');
-      card.toggleClass('rubberBand animated');
-    }, 200, card, previousCard);
-    setTimeout(function(){
-      previousCard.toggleClass('rubberBand animated');
-      card.toggleClass('rubberBand animated');
-    }, 1000, card, previousCard);
-  } else {
-    card.off();
-    setTimeout(function(){
-      previousCard.toggleClass('wobble animated');
-      card.toggleClass('wobble animated');
-    }, 400, card, previousCard);
-    setTimeout(function(){
-      flipCard(previousCard);
-      flipCard(card);
-      previousCard.on('click', playerMove);
-      card.on('click', playerMove);
-      previousCard.toggleClass('wobble animated');
-      card.toggleClass('wobble animated');
-    }, 1000, card, previousCard);
-  }
-}
-
-/**
-* @description resets the game so player can start again
-*/
-let resetGame = function(){
-  // disable the cards listener until reset is complete
-  $('.cards').off('click', playerMove);
-  // stop player from crashing game with multiple clicks
-  $('.reset').off('click', resetGame);
-  // check the timer needs stopping
-  if (!theTimer.startTimer) {
-    theTimer.stop();
-  }
-  // check a card has been flipped
-  if ($('.flip-card').length > 0 || gameSettings.moves > 0) {
-    flipCard($('.flip-card'));
-    // reset all settings and shuffle cards after they are turned
-    setTimeout(function(){
-      gameSettings.previousCard = null;
-      gameSettings.cardsFlipped = 0;
-      gameSettings.cardPairsFound = 0;
-      theTimer.reset();
-      updateMovesCounter(false);
-      $('.star-rating').css('opacity', '1');
-      shuffleCards($('.cards'));
-      $('.cards').on('click', playerMove);
-      $('.reset').on('click', resetGame);
-    }, 800);
-  } else {
-    shuffleCards($('.cards'));
-    $('.cards').on('click', playerMove);
-    $('.reset').on('click', resetGame);
-  }
-};
-
-/**
-* @description increase of decrease the moves counter
-* @param {boolean} increase - true to increase the counter and false to reset it
-*/
-let updateMovesCounter = function(increase) {
-  if (increase) {
-    gameSettings.moves++;    
-  } else {
-    gameSettings.moves = 0;
-  }
-  $('.moves-counter').text(gameSettings.moves);
-}
-
-/**
-* @description rates the player depending on number of moves
-* @returns {number} players score rating
-*/
-let ratePlayer = function() {
-  let moves = gameSettings.moves;
-  if (moves == 12) {
-    $('.star-rating')[2].style.opacity = 0;
-    $('.star-rating')[5].style.opacity = 0;
-  } else if (moves == 16) {
-    $('.star-rating')[1].style.opacity = 0;
-    $('.star-rating')[4].style.opacity = 0;
-  } else {
-    // do nothing
-  }
-}
-
-// timer object, starts, stops and restarts the timer
-const theTimer = {
-  minutes: 0,
-  seconds: 0,
-  startTimer: true,
-  start: function() {
-    if (this.startTimer) {
-      this.startTimer = false;
-      this.timer = setInterval(function() {
-        theTimer.seconds++;
-        theTimer.seconds = (theTimer.seconds == 60)?0:theTimer.seconds;
-        if (theTimer.seconds == 0) {
-          theTimer.minutes++;
-        }
-        let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
-        let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
-        $('.timer-minutes').text(mins);
-        $('.timer-seconds').text(secs);
-      }, 1000);
-    }
   },
-  stop: function() {
-    clearInterval(theTimer.timer);
-  },
-  reset: function() {
-    this.seconds = 0;
-    this.minutes = 0;
-    $('.timer-minutes').text("00");
-    $('.timer-seconds').text("00");
-    this.startTimer = true;
-  },
-  retrieveTime: function() {
-    let secs = (theTimer.seconds < 10)?"0" + theTimer.seconds:theTimer.seconds;
-    let mins = (theTimer.minutes < 10)?"0" + theTimer.minutes:theTimer.minutes;
-    let theTime = String(mins + ":" + secs);
-    return theTime;
-  }
-};
-
-class Leaderboard {
-  /**
-  * @description Represents the game leaderboard
-  * @construtor
-  */
-  constructor() {
-    $('.leaderboard').html("");
-    $('.leaderboard').append('<caption>LEADERBOARD</caption>');
-    $('.leaderboard').append('<tr class="table-header"><th>&#35</th><th>Name</th><th>Moves</th><th>Time</th><th>Stars</th></tr>');
-  }
-  /**
-  * @description getter to retrieve scoreboard from localStorage
-  * @returns {array of objects} scores
-  */
-  get retrieveScores() {
-    let scores = [];
-    let length = localStorage.getItem("leaderboardSize");
-    if (length > 0) {
-      for (let i=0; i < length; i++) {
-        scores[i] = {
-          name: localStorage.getItem("name"+i),
-          time: localStorage.getItem("time"+i),
-          moves: localStorage.getItem("moves"+i),
-          stars: localStorage.getItem("stars"+i)
-        };
-      };
-    }else{
-      scores = false;
-    }
-    return scores;
-  }
-  /**
-  * @description Takes the values and compares them according to moves and time into new array, update.
-  * @param {array of object} latest - Scores from the game just played
-  * @param {array of objects} localScores - Scores from previous games saved in localStorage
-  * @returns {array of objects} update
-  */
-  compareScores(latest, localScores) {
-    let localSize = parseInt(localStorage.getItem("leaderboardSize"));
-    let latestPush = true; // to stop interation if pushed to update array
-    let moves = parseInt(latest[0].moves);
-    let time = parseInt(latest[0].time);
-    let update = [];
-    // take the latest and local scores and compare them
-    localScores.forEach( (local, index) => {
-      if (latestPush) {
-        if (moves < parseInt(local.moves)) {
-          update.push(latest[0]);
-          latestPush = false;
-        }else if (moves > parseInt(local.moves)) {
-          update.push(local);
-        }else if (moves == parseInt(local.moves)) {
-          if (time <= parseInt(local.time)) {
-            update.push(latest[0]);
-            latestPush = false;
-          }else{
-            update.push(local);
-          }
-        }
+  getDeckOfCards: function(deckTheme) {
+    let theDeck;
+    model.deckOfCards.forEach((deck)=> {
+      if (deck.theme == deckTheme) {
+        theDeck = deck;
+      }else{
+        theDeck = `Deck of cards ${deckTheme} NOT FOUND`;
       }
-      // Address issue of the leaderboard scores not moving up when the latest is inserted before the end
-      if (!latestPush && index < (localSize - 1)) {
-        update.push(local)
-      }
-      // Address issue of using the forEach loop when localsize is less than 5
-      if ( (index + 1) == localSize && 5 > localSize) {
-        if (latestPush) {
-          update.push(latest[0]);
-        }else{
-          update.push(local);
-        }
-      } 
     });
-    return update;
-  }
-  /**
-  * @description gathers the last games score results and leaderboard stored in localStorage updating the modal and localstorage
-  */
-  prepareScores() {
-    let update;
-    // gather the latest score results
-    let latest = [{
-      name: $('.player-name').prop('value'),
-      time: theTimer.retrieveTime(),
-      moves: gameSettings.moves,
-      stars: (gameSettings.moves < 13)?3:(gameSettings.moves > 18)?1:2
-    }];
-    // gather local scores, if any
-    let localScores = this.retrieveScores;
-    // make sure localstorage data exists before comparing
-    if (localScores) {
-      update = this.compareScores(latest, localScores);
-    }else{
-      update = latest;
-    }
-    this.updateModal(update);
-    this.updateLocalStorage(update);
-  }
-  /**
-  * @description Updates the modal window using HTML tags adding the new scoreboard information
-  * @param {array of objects} update - Updated scoreboard
-  */
-  updateModal(update) {
-    // set latest score information at top of modal
-    $('.modal-info-time').text(theTimer.retrieveTime());
-    $('.modal-info-moves').text(gameSettings.moves);
-    // append each score to the modal, done once per game completion
-    update.forEach( (item, index) => {
-      $('.leaderboard').append('<tr class="board-row"></tr>');
-      $('.board-row:last-child').append($('<td></td>').text(index + 1));
-      $('.board-row:last-child').append($('<td></td>').text(item.name));
-      $('.board-row:last-child').append($('<td></td>').text(item.moves));
-      $('.board-row:last-child').append($('<td></td>').text(item.time));
-      $('.board-row:last-child').append($('<td></td>').text(item.stars));
-    });
-  }
-  /**
-  * @description Updates the localStorage with the latest scoreboard
-  * @param {array of objects} update - Updated scoreboard
-  */
-  updateLocalStorage(update) {
-    localStorage.setItem("leaderboardSize", update.length);
-    update.forEach( (item, i) => {
-      localStorage.setItem("name" + i, item.name);
-      localStorage.setItem("time" + i, item.time);
-      localStorage.setItem("moves" + i, item.moves);
-      localStorage.setItem("stars" + i, item.stars);
-    })
-  }
-  /**
-  * @description Brings the modal window to the front displaying the leaderboard and last game scores
-  */
-  displayScores() {
-    this.prepareScores();
-    $('#myModal').modal();
+    return theDeck;
+  },
+  getActiveDeckTheme: function() {
+    return model.activeDeckTheme;
   }
 }
-
-
-// prepare game after page load
-// $(initGame);
 
 
 // LAUNCH GAME
