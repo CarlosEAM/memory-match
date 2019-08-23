@@ -1,10 +1,10 @@
 let model = {
-  gameboard: null,
-  currentCardFlip: null,
-  lastCardFlip: null,
   timerActive: false,
   timerCounter: null,
   score: 3,
+  gameboard: null,
+  currentCardFlip: null,
+  lastCardFlip: null,
   activeDeckTheme: 'poker',
   deckOfCards: [
     {
@@ -168,12 +168,12 @@ let timerView = {
 
 
 // Take care of rendering the score
-let scoreView = {
+let movesView = {
   init: function() {
-    console.log("STARTING THE SCORE");
+    this.movesWrapper = document.getElementsByClassName('moves-counter')[0];
   },
   render: function() {
-    console.log("RENDERING THE SCORE VIEW");
+    this.movesWrapper.innerText++;
   }
 }
 
@@ -188,10 +188,9 @@ let octopus = {
     // TODO: REMOVE LISTENER. ONLY MEANT FOR TESTING NOT FOR PRODUCTION
     document.getElementsByClassName('btn-reset')[0].addEventListener('click', octopus.stopTimer);
     
-
     cardDeckView.init();
     timerView.init();
-    scoreView.init();
+    movesView.init();
     
   },
   activeCard: function(event) {
@@ -200,15 +199,21 @@ let octopus = {
     event.stopPropagation();
     let card = event.srcElement.parentElement.parentElement;
 
-    // store the calling object
+    // Prevent glitch when player clicks quickly many times in a row
+    if (event.srcElement.className == 'cards-wrapper') {return}
+
+    // Store the calling object
     if (octopus.getLastCardFlip()) {
       octopus.setCurrentCardFlip(card);
     }else{
       octopus.setLastCardFlip(card);
     }
 
-    // lets flip it
+    // Lets flip it
     octopus.flipCard(card);
+
+    // The movesView is taking care of the moves counter
+    movesView.render();
 
     // check if the same card was clicked on twice
     if (octopus.getLastCardFlip() === octopus.getCurrentCardFlip()) {
