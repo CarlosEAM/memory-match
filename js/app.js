@@ -66,15 +66,12 @@ let cardDeckView = {
     this.gameBoard = document.querySelector('.game-board');
 
     this.render();
-
-    console.log("CARD LISTENERS READY");
-
   },
   render: function() {
     console.log("RENDERING THE CARDS VIEW");
 
     // Clear gameBoard
-    this.gameBoard.html = "";
+    this.gameBoard.innerHTML = "";
 
     let activeTheme = octopus.getActiveDeckTheme();
     let cardDeck = octopus.getDeckOfCards(activeTheme);
@@ -148,10 +145,6 @@ let timerView = {
     let s = parseInt(timerView.seconds.innerText);
     let m = timerView.minutes.innerText;
 
-    
-
-    console.log(typeof m)
-
     // When 59secs gone by then minute ticks over
     if (s == "59") {
       m = octopus.checkTime(m);
@@ -174,6 +167,7 @@ let timerView = {
 let movesView = {
   init: function() {
     this.movesWrapper = document.getElementsByClassName('moves-counter')[0];
+    this.movesWrapper.innerText = "0";
   },
   render: function() {
     this.movesWrapper.innerText++;
@@ -188,8 +182,8 @@ let octopus = {
 
     model.gameboard = document.getElementsByClassName('game-board')[0];
 
-    // TODO: REMOVE LISTENER. ONLY MEANT FOR TESTING NOT FOR PRODUCTION
-    document.getElementsByClassName('btn-reset')[0].addEventListener('click', octopus.stopTimer);
+    this.resetButton = document.getElementsByClassName('btn-reset')[0];
+    this.resetButton.addEventListener('click', octopus.resetGame);
     
     cardDeckView.init();
     timerView.init();
@@ -243,6 +237,11 @@ let octopus = {
       octopus.resetDefaults();
     }
 
+    // Check if all cards have been matched
+    if (octopus.getMatchesFound() == octopus.getDeckSize()) {
+      console.log("ALL MATCHES FOUND!!!!");
+    }
+
   },
   getGameboard: function() {
     return model.gameboard;
@@ -257,6 +256,8 @@ let octopus = {
   },
   checkForMatch: function() {
     if (octopus.getLastCardFlip().dataset.card === octopus.getCurrentCardFlip().dataset.card) {
+      // Add it to the matches tracker variable
+      model.matchesFound++;
       return true;
     }
     return false;
@@ -291,10 +292,18 @@ let octopus = {
   getActiveDeckTheme: function() {
     return model.activeDeckTheme;
   },
+  getDeckSize: function() {
+    return this.getDeckOfCards(model.activeDeckTheme).size;
+  },
+  getMatchesFound: function() {
+    return model.matchesFound;
+  },
   startTimer: function() {
     // Remove the listener to stop multiple calls
     let gameboard = octopus.getGameboard();
     gameboard.removeEventListener('click', octopus.startTimer, true);
+
+    model.timerActive = true;
 
     // Start the timer interval
     model.timerCounter = setInterval(timerView.render, 1000);
@@ -303,6 +312,7 @@ let octopus = {
     // Remove the interval and stopping the timer
     clearInterval(model.timerCounter);
     model.timerCounter = null;
+    model.timerActive = false;
   },
   checkTime: function(t) {
     t++;
@@ -312,6 +322,20 @@ let octopus = {
       t = "00"
     }
     return t;
+  },
+  resetGame: function() {
+    octopus.stopTimer();
+
+    // Reset values in modal object
+    model.score = 3,
+    model.matchesFound = 0,
+    model.currentCardFlip = null,
+    model.lastCardFlip = null
+
+    // restart all views
+    cardDeckView.init();
+    timerView.init();
+    movesView.init();
   }
 }
 
@@ -320,3 +344,18 @@ let octopus = {
 window.onload = function() {
   octopus.init();
 }
+
+/*
+ * TODO: Alist of things to do.
+ * - Reset button
+ * - Animation effects for:
+ *   - Cards that match
+ *   - Cards that done match
+ * - When all matches found something must happen
+ * - The scoreboard details are stored in local memory
+ * - The About modal information
+ * - The Settings modal
+ *   - Different themes
+ *   - Music on/off
+ *   - View of the scoreboard by user request
+ */
