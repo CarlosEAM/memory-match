@@ -3,6 +3,7 @@ let model = {
   timerCounter: null,
   score: 3,
   gameboard: null,
+  matchesFound: 0,
   currentCardFlip: null,
   lastCardFlip: null,
   activeDeckTheme: 'poker',
@@ -145,16 +146,18 @@ let timerView = {
   },
   render: function() {
     let s = parseInt(timerView.seconds.innerText);
-    let m = parseInt(timerView.minutes.innerText);
+    let m = timerView.minutes.innerText;
+
+    
+
+    console.log(typeof m)
 
     // When 59secs gone by then minute ticks over
-    if (s == 59) {
+    if (s == "59") {
       m = octopus.checkTime(m);
     }else if (m == 10) {
       // This is a quick game so lets assume that 10 minutes indicates player left game
       octopus.stopTimer();
-    }else{
-      m = "00";
     }
 
     // Carry on with the seconds
@@ -221,7 +224,7 @@ let octopus = {
       return;
     }
 
-    // Check for a match
+    // If this is the second card being flipped then check for a match
     if (octopus.getCurrentCardFlip()) {
       if (octopus.checkForMatch()) {
         // Found a match
@@ -235,9 +238,8 @@ let octopus = {
           octopus.flipCard(cardA);
           octopus.flipCard(cardB);
         }, 800);
-        
       }
-      // reset card dafults
+      // Regardless of match reset card dafults
       octopus.resetDefaults();
     }
 
@@ -254,11 +256,10 @@ let octopus = {
     }
   },
   checkForMatch: function() {
-    if (this.getLastCardFlip().dataset.card === this.getCurrentCardFlip().dataset.card) {
+    if (octopus.getLastCardFlip().dataset.card === octopus.getCurrentCardFlip().dataset.card) {
       return true;
-    }else{
-      return false;
     }
+    return false;
   },
   resetDefaults: function() {
     this.setLastCardFlip(null);
@@ -307,6 +308,8 @@ let octopus = {
     t++;
     if (t < 10) {
       t = "0" + t;
+    }else if (t == 60) {
+      t = "00"
     }
     return t;
   }
