@@ -163,7 +163,7 @@ let timerView = {
 }
 
 
-// Take care of rendering the score
+// Take care of rendering moves counter
 let movesView = {
   init: function() {
     this.movesWrapper = document.getElementsByClassName('moves-counter')[0];
@@ -179,11 +179,32 @@ let octopus = {
   init: function() {
     // Load up the game
     console.log("STARTING THE OCTOPUS");
+    document.getElementById('test-button').addEventListener('click', octopus.testFunction);
+
+
+    // Local variables
+    this.userInputModal = document.getElementById('the-player-name');
+    this.userInputModalBtn = document.getElementById('userInputModalBtn');
 
     model.gameboard = document.getElementsByClassName('game-board')[0];
 
+    // Prep game reset
     this.resetButton = document.getElementsByClassName('btn-reset')[0];
     this.resetButton.addEventListener('click', octopus.resetGame);
+
+    // Setup local storage
+    if (this.storageAvailable('localStorage')) {
+      model.leaderboard = JSON.parse(localStorage.getItem('ceam17-memorymatch'));
+      // In case this is first time playing setup demo leaderboard
+      if (!model.leaderboard) {this.starterLeaderboard('ceam17-memorymatch')}
+    }else{
+      alert("YOU DONT HAVE LOCAL STORAGE AVAILABLE.");
+    }
+
+    // Prepare the modal support content sidebar
+    document.getElementById("nav-modal-leaderboard").addEventListener('click', ()=>{
+      octopus.displayLeaderboard();
+    });
     
     cardDeckView.init();
     timerView.init();
@@ -224,14 +245,28 @@ let octopus = {
         // Found a match
         octopus.getLastCardFlip().children[0].removeEventListener('click', octopus.activeCard);
         this.removeEventListener('click', octopus.activeCard);
+
+        // Add bounce effect for matches in a timeout for timing reasons
+        setTimeout((a, b)=> {
+          a.className += ' animated rubberBand';
+          b.className += ' animated rubberBand';
+        }, 400, octopus.getLastCardFlip().children[0], this); 
+        
+
       }else{
-        // Two cards dont match
-        let cardA = octopus.getLastCardFlip();
-        let cardB = octopus.getCurrentCardFlip();
-        setTimeout(()=>{
-          octopus.flipCard(cardA);
-          octopus.flipCard(cardB);
-        }, 800);
+        // Add bounce effect for non match in a timeout
+        setTimeout((a, b)=> {
+          a.className += ' animated shake';
+          b.className += ' animated shake';
+        }, 400, octopus.getLastCardFlip().children[0], this);
+
+        // Flip cards back to their position after arbitrary amount of time
+        setTimeout((a, b)=>{
+          octopus.flipCard(a);
+          octopus.flipCard(b);
+          a.children[0].className = 'cards-wrapper';
+          b.children[0].className = 'cards-wrapper';
+        }, 800, octopus.getLastCardFlip(), octopus.getCurrentCardFlip());
       }
       // Regardless of match reset card dafults
       octopus.resetDefaults();
@@ -239,7 +274,7 @@ let octopus = {
 
     // Check if all cards have been matched
     if (octopus.getMatchesFound() == octopus.getDeckSize()) {
-      console.log("ALL MATCHES FOUND!!!!");
+      octopus.gameOver();
     }
 
   },
@@ -336,6 +371,159 @@ let octopus = {
     cardDeckView.init();
     timerView.init();
     movesView.init();
+  },
+  gameOver: function() {
+    console.log("YOU HAVE WON THE GAME");
+    // TODO: do something about the leaderboard when the game is won.
+    // TODO: create the webstorage data layout
+
+    this.userInputModalBtn.addEventListener('click', octopus.updateLeaderboard);
+
+    // Ask user for their name
+    $('#userInputModal').modal('show');
+    
+  },
+  getPlayersName: function() {
+    return this.userInputModal.value;
+  },
+  updateLeaderboard: function() {
+    console.log("PREPING LEADERBOARD");
+
+    // remove listener so leaderboard doesnt update on just any call to this userInput modal
+    octopus.userInputModalBtn.removeEventListener('click', octopus.updateLeaderboard);
+
+    // Prepare the time for storage
+    let minutes = timerView.minutes.innerText;
+    let seconds = timerView.seconds.innerText;
+    let time = minutes + ":" + seconds;
+
+    // gather current game data
+    let addScore = {
+      playerName: octopus.getPlayersName(),
+      moves: parseInt(movesView.movesWrapper.innerText),
+      score: 3,
+      time: time
+    }
+    console.log(addScore);
+
+    // Check the game score and return ordered array from best score to least
+    let leaderboard = octopus.sortLeaderboard();
+
+    console.log("END OF TEST")
+
+    
+
+    // Combine data with existing ,if any, leaderboard data
+
+    // Display leaderboard in modal
+
+    // Store leaderboard in localStorage
+  },
+  sortLeaderboard: function(addScore = null) {
+    let leaderboard = octopus.getLeaderboard();
+
+    // One new score can be added to list before sorting it
+    if (addScore) leaderboard.push(addScore);
+
+    // Rearrange by number of moves then by time
+    let byMoves = leaderboard.sort((a,b) => a.moves - b.moves);
+    console.log(byMoves);
+
+    let l = leaderboard.length;
+    leaderboard = [];
+    for (let i=0; i<l; i++) {
+      // If this is the last item in the list then push it and break loop
+      if (i+1 === l) {
+        leaderboard.push(byMoves[i]);
+        break;
+      }
+
+      // Prepare the items to check
+      let a = byMoves[i];
+      let b = (i+1 === l)?byMoves[i]:byMoves[i + 1];
+
+      // Check if moves match, and push to list the lowest moves
+      if (a.moves < b.moves) {
+        leaderboard.push(a);
+        continue;
+      }
+
+      // If two have same moves then check their times
+      if (parseInt(a.time) < parseInt(b.time)) {
+        leaderboard.push(a);
+      }else{
+        leaderboard.push(b);
+        leaderboard.push(a);
+        i++;
+      }
+    }
+
+    return leaderboard;
+  },
+  starterLeaderboard: function(name) {
+    // Create fake players
+    let leaderboard = [
+    {
+      name: "Smiths Jones",
+      moves: 22,
+      score: 3,
+      time: "04:30"
+    },
+    {
+      name: "Gloria Capricorn",
+      moves: 28,
+      score: 2,
+      time: "04:30"
+    },
+    {
+      name: "Smiths Junior",
+      moves: 21,
+      score: 3,
+      time: "04:30"
+    },
+    {
+      name: "Smiths Major",
+      moves: 22,
+      score: 3,
+      time: "04:00"
+    }];
+
+    // Store demo leaderboard in local storage
+    localStorage.setItem(name, JSON.stringify(leaderboard));
+
+  },
+  getLeaderboard: function() {
+    return model.leaderboard;
+  },
+  displayLeaderboard: function() {
+    console.log("DISPLAYING LEADERBOARD");
+    $('#myModal').modal('show');
+  },
+  storageAvailable: function(type) {
+    var storage;
+    try {
+        storage = window[type];
+        var x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    }catch(e) {
+        return e instanceof DOMException && (
+            // everything except Firefox
+            e.code === 22 ||
+            // Firefox
+            e.code === 1014 ||
+            // test name field too, because code might not be present
+            // everything except Firefox
+            e.name === 'QuotaExceededError' ||
+            // Firefox
+            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            (storage && storage.length !== 0);
+    }
+  },
+  testFunction: function() {
+    octopus.gameOver();
   }
 }
 
@@ -347,13 +535,9 @@ window.onload = function() {
 
 /*
  * TODO: Alist of things to do.
- * - Reset button
- * - Animation effects for:
- *   - Cards that match
- *   - Cards that done match
  * - When all matches found something must happen
+ * - Score view
  * - The scoreboard details are stored in local memory
- * - The About modal information
  * - The Settings modal
  *   - Different themes
  *   - Music on/off

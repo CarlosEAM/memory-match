@@ -28,13 +28,13 @@
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav mr-auto text-center">
 				<li class="nav-item">
-					<button class="nav-link">Scoreboard</button>
+					<button id="nav-modal-leaderboard" class="nav-link">Scoreboard</button>
 				</li>
 				<li class="nav-item">
-					<button class="nav-link" type="button" data-toggle="modal" data-target="#settings-modal">Settings</button>
+					<button id="nav-modal-settings" class="nav-link" type="button" data-toggle="modal" data-target="#settingsModal">Settings</button>
 				</li>
 				<li class="nav-item">
-					<button class="nav-link" type="button" data-toggle="modal" data-target="#about-modal">About</button>
+					<button id="nav-modal-about" class="nav-link" type="button" data-toggle="modal" data-target="#aboutModal">About</button>
 				</li>
 			</ul>
 		</div>
@@ -84,26 +84,27 @@
 		<p class="col-12">Copyright 2017-2019</p>
 	</footer>
 
-  <!-- Bootstrap Modal, custom to receive user input -->
-  <div class="modal fade text-center" id="inputModal" role="dialog" aria-labelledby="userinputmodal" tabindex="-1">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="userinputmodal">Memory Match</h3>
-        </div>
-        <div class="modal-body">
-          <h1 class="text-center">Please enter your name!</h1>
-          <section class="modal-info-wrapper">
-            <label>( max 20 characters )</label>
-            <input type="text" class="player-name" maxlength="20" name="playerName" autofocus>
-          </section>
-          <div class="text-center">
-            <button type="button" class="btn btn-primary btn-lg continue" data-dismiss="modal">Continue</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Bootstrap Modal, customised to receive user input -->
+<div class="modal fade" id="userInputModal" tabindex="-1" role="dialog" aria-labelledby="userinputmodal" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="userinputmodal">Memory Match</h5>
+			</div>
+			<div class="modal-body text-center">
+    			<h2 class="text-center">Please enter your name!</h2>
+				<section class="modal-info-wrapper">
+					<label for="the-player-name">( max 20 characters )</label>
+					<input id="the-player-name" type="text" class="player-name" maxlength="20" name="playerName" autofocus>
+				</section>
+				<div class="text-center">
+					<button type="button" id="userInputModalBtn" class="btn btn-primary btn-lg continue" data-dismiss="modal">Continue</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 
   <!-- Bootstrap modal customised for the leaderboard -->
   <div class="modal fade text-center" id="myModal" role="dialog" aria-labelledby="congratsmodal" tabindex="-1">
@@ -139,7 +140,7 @@
   </div>
 
 	<!-- SETTINGS modal -->
-	<div class="modal fade" id="settings-modal" tabindex="-1" role="dialog" aria-labelledby="Settings modal">
+	<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="Settings modal">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -159,25 +160,38 @@
 		</div>
 	</div>
 
-	<!-- ABOUT the memory match game, modal -->
-	<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about modal">
-		<div class="modal-dialog modal-lg" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">About</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body text-center">
-					<p>A little something about the game goes here</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
+
+<!-- Bootstrap Modal, customised to show About the game information -->
+<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutmodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aboutmodal">About</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Memory Match is a fun memory game using cards.</p>
+				<p>There are 16 cards on the deck, each with a matching pair.
+					 The goal is to find all the pairs in the quickest time possible and with the lowest
+					number of flips.</p>
+				<p>Currently there is only 1 set of cards but I will be adding more every now and then.</p>
+				<p>The game was developed as part of an assignment for the Udacity Web Developer course.</p>
+				<p>Game developer and designer:</p>
+				<ul>
+					<li>Carlos EAM, me (at) carlosealford.com ( developer )</li>
+					<li>Amy Sutton, me (at) amythehatter.com ( designer )</li>
+				</ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="test-button">GAME OVER</button>
 
 
 </div>

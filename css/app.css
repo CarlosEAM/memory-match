@@ -115,6 +115,11 @@ h1 {
   transition: transform 0.22s, opacity 0s ease 0.21s;
 }
 
+.card-match {
+	transform: translateX(40px);
+	transition: transform .8s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+}
+
 /* MODALS */
 .modal {
   background-color: rgba(212, 187, 10, 0.8);
